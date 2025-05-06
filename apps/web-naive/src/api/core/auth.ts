@@ -1,4 +1,4 @@
-import { baseRequestClient, requestClient } from '#/api/request';
+import { baseRequest2Client, baseRequestClient } from '#/api/request';
 
 export namespace AuthApi {
   /** 登录接口参数 */
@@ -9,7 +9,8 @@ export namespace AuthApi {
 
   /** 登录接口返回值 */
   export interface LoginResult {
-    accessToken: string;
+    accessToken?: string;
+    code?: string;
   }
 
   export interface RefreshTokenResult {
@@ -21,8 +22,10 @@ export namespace AuthApi {
 /**
  * 登录
  */
-export async function loginApi(data: AuthApi.LoginParams) {
-  return requestClient.post<AuthApi.LoginResult>('/auth/login', data);
+export async function loginApi(data: AuthApi.LoginParams, query = {}) {
+  return baseRequest2Client.post<AuthApi.LoginResult>('/user/login', data, {
+    params: query,
+  });
 }
 
 /**
@@ -47,5 +50,5 @@ export async function logoutApi() {
  * 获取用户权限码
  */
 export async function getAccessCodesApi() {
-  return requestClient.get<string[]>('/auth/codes');
+  return [];
 }

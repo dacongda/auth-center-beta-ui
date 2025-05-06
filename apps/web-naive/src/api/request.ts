@@ -56,7 +56,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   }
 
   function formatToken(token: null | string) {
-    return token ? `Bearer ${token}` : null;
+    return token ? `${token}` : null;
   }
 
   // 请求头处理
@@ -106,6 +106,10 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 }
 
 export const requestClient = createRequestClient(apiURL, {
+  responseReturn: 'data',
+});
+
+export const baseRequest2Client = createRequestClient(`/rapi2`, {
   responseReturn: 'data',
 });
 

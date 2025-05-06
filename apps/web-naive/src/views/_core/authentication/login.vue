@@ -1,71 +1,56 @@
 <script lang="ts" setup>
 import type { VbenFormSchema } from '@vben/common-ui';
-import type { BasicOption } from '@vben/types';
+import type { Recordable } from '@vben/types';
 
-import { computed, markRaw } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
-import { AuthenticationLogin, SliderCaptcha, z } from '@vben/common-ui';
+import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { loginApi } from '#/api/core/auth';
 import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
+const route = useRoute();
 
-const MOCK_USER_OPTIONS: BasicOption[] = [
-  {
-    label: 'Super',
-    value: 'vben',
-  },
-  {
-    label: 'Admin',
-    value: 'admin',
-  },
-  {
-    label: 'User',
-    value: 'jack',
-  },
-];
+const oAuthParms: any = route.query;
+const authFunc: any = ref(authStore.authLogin);
+
+onMounted(() => {
+  window.console.log(oAuthParms);
+  if (oAuthParms.response_type === 'code') {
+    authFunc.value = authCode;
+  }
+});
+
+const authCode = (params: Recordable<any>) => {
+  authStore.loginLoading = true;
+  loginApi(params, oAuthParms).then((res: any) => {
+    window.console.log(res);
+    authStore.loginLoading = false;
+    const params = new URLSearchParams();
+    params.set('code', res.code);
+    if (oAuthParms.nonce) {
+      params.set('nonce', oAuthParms.nonce);
+    }
+    if (oAuthParms.state) {
+      params.set('state', oAuthParms.state);
+    }
+    window.location.href = `${oAuthParms.redirect_uri}?${params.toString()}`;
+  });
+};
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
-    {
-      component: 'VbenSelect',
-      componentProps: {
-        options: MOCK_USER_OPTIONS,
-        placeholder: $t('authentication.selectAccount'),
-      },
-      fieldName: 'selectAccount',
-      label: $t('authentication.selectAccount'),
-      rules: z
-        .string()
-        .min(1, { message: $t('authentication.selectAccount') })
-        .optional()
-        .default('vben'),
-    },
     {
       component: 'VbenInput',
       componentProps: {
         placeholder: $t('authentication.usernameTip'),
       },
-      dependencies: {
-        trigger(values, form) {
-          if (values.selectAccount) {
-            const findUser = MOCK_USER_OPTIONS.find(
-              (item) => item.value === values.selectAccount,
-            );
-            if (findUser) {
-              form.setValues({
-                password: '123456',
-                username: findUser.value,
-              });
-            }
-          }
-        },
-        triggerFields: ['selectAccount'],
-      },
-      fieldName: 'username',
+      fieldName: 'name',
       label: $t('authentication.username'),
       rules: z.string().min(1, { message: $t('authentication.usernameTip') }),
     },
@@ -78,13 +63,6 @@ const formSchema = computed((): VbenFormSchema[] => {
       label: $t('authentication.password'),
       rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
     },
-    {
-      component: markRaw(SliderCaptcha),
-      fieldName: 'captcha',
-      rules: z.boolean().refine((value) => value, {
-        message: $t('authentication.verifyRequiredTip'),
-      }),
-    },
   ];
 });
 </script>
@@ -93,6 +71,6 @@ const formSchema = computed((): VbenFormSchema[] => {
   <AuthenticationLogin
     :form-schema="formSchema"
     :loading="authStore.loginLoading"
-    @submit="authStore.authLogin"
+    @submit="authFunc"
   />
 </template>
