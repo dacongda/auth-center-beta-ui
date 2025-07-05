@@ -1,6 +1,6 @@
-<script lang="tsx" setup>
+<script setup lang="tsx">
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
@@ -8,37 +8,13 @@ import { NButton, NCard, NGrid, NGridItem } from 'naive-ui';
 
 import { useVbenForm } from '#/adapter/form';
 import { message } from '#/adapter/naive';
-import {
-  addGroupApi,
-  getGroupApi,
-  getGroupTreeApi,
-  updateGroupApi,
-} from '#/api/core/group';
+import { addUserApi } from '#/api';
+import { getGroupTreeApi } from '#/api/core/group';
 
 const router = useRouter();
-const route = useRoute();
-const parentId = history.state.parentId;
-
-const id = route.params?.id;
-const curGroup = ref<any>();
-
-const onSubmit = (value: any) => {
-  if (id) {
-    value.id = id;
-    updateGroupApi(value).then(() => message.success('成功'));
-  } else {
-    addGroupApi(value).then(() => message.success('成功'));
-  }
-};
 
 const groupTree = ref<any>([]);
 onMounted(() => {
-  if (id) {
-    getGroupApi({ id }).then((res) => {
-      curGroup.value = res;
-      setValues(curGroup.value);
-    });
-  }
   getGroupTreeApi().then((res) => {
     groupTree.value = [
       {
@@ -50,48 +26,63 @@ onMounted(() => {
   });
 });
 
-const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
-  // 所有表单项共用，可单独在表单内覆盖
+const onSubmit = (value: any) => {
+  addUserApi(value).then((res) => {
+    message.success(res);
+  });
+};
+
+const [BaseForm] = useVbenForm({
   commonConfig: {
-    // 所有表单项
     componentProps: {
       class: 'w-full',
     },
   },
-  // 提交函数
   handleSubmit: onSubmit,
-  // 垂直布局，label和input在不同行，值为vertical
-  // 水平布局，label和input在同一行
   layout: 'horizontal',
   schema: [
     {
-      // 组件需要在 #/adapter.ts内注册，并加上类型
       component: 'Input',
-      // 对应组件的参数
       componentProps: {
-        placeholder: '请输入群组名',
+        placeholder: '请输入编号',
       },
-      // 字段名
+      fieldName: 'number',
+      label: '编号',
+    },
+    {
+      component: 'Input',
+
+      componentProps: {
+        placeholder: '请输入用户名',
+      },
       fieldName: 'name',
-      // 界面显示的label
-      label: '群组名',
+      label: '用户名',
+    },
+    {
+      component: 'Input',
+      componentProps: {
+        showPasswordOn: 'mousedown',
+        type: 'password',
+        placeholder: '请输入密码',
+      },
+      fieldName: 'password',
+      label: '密码',
     },
     {
       component: 'Select',
       componentProps: {
         allowClear: true,
         filterOption: true,
-        multiple: true,
         filterable: true,
         tag: true,
         options: [
           {
-            label: '管理员',
-            value: 'admin',
-          },
-          {
             label: '用户',
             value: 'user',
+          },
+          {
+            label: '管理员',
+            value: 'admin',
           },
         ],
         placeholder: '请选择',
@@ -113,19 +104,25 @@ const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
         options: groupTree,
         treeNodeFilterProp: 'label',
       },
-      fieldName: 'parentId',
-      label: '上级群组',
+      fieldName: 'groupId',
+      label: '归属群组',
     },
   ],
   wrapperClass: 'grid-cols-1',
 });
-
-setFieldValue('parentId', parentId);
 </script>
 <template>
-  <Page :title="route.name === 'AddGroup' ? '新增群组' : '编辑群组'">
+  <Page title="新增用户">
     <template #extra>
-      <NButton @click="router.go(-1)"> 返回上一页 </NButton>
+      <NButton
+        @click="
+          () => {
+            router.go(-1);
+          }
+        "
+      >
+        返回上一页
+      </NButton>
     </template>
     <NGrid item-responsive cols="8" responsive="screen">
       <NGridItem span="8 m:4 l:4" offset="0 m:2 l:2">

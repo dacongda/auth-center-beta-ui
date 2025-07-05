@@ -1,5 +1,9 @@
 {
   "add_group": "",
+  "add_user": "add user",
+  "edit_group": "Edit group",
+  "edit_user": "Edit user",
+  "group_list": "Groups",
   "title": "Management",
-  "user_list": "User list"
+  "user_list": "Users"
 }

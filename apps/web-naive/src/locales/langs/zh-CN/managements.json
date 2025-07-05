@@ -1,5 +1,9 @@
 {
   "add_group": "增加群组",
+  "add_user": "增加用户",
+  "edit_group": "编辑群组",
+  "edit_user": "编辑用户",
+  "group_list": "群组管理",
   "title": "管理列表",
-  "user_list": "用户列表"
+  "user_list": "用户管理"
 }

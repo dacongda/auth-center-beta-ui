@@ -11,10 +11,10 @@ import { NButton, NDropdown, NSpace, NSplit, NTree } from 'naive-ui';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { getGroupTreeApi } from '#/api/core/group';
 
-import { gridOptions } from './user-data';
+import { goAddGroup } from './group-data';
+import { goAddUser, gridOptions } from './user-data';
 
 const [Grid, gridApi] = useVbenVxeGrid({ gridOptions });
-const router = useRouter();
 
 const groupXRef = ref(0);
 const groupYRef = ref(0);
@@ -22,16 +22,11 @@ const showDropdownRef = ref(false);
 const dropDownGroup = ref();
 const optionsRef = ref();
 
-const handleSelect = () => {
-  goAddGroup(dropDownGroup.value.id);
-  showDropdownRef.value = false;
-};
+const router = useRouter();
 
-const goAddGroup = (parentId: any) => {
-  router.push({
-    name: 'AddGroup',
-    state: { parentId },
-  });
+const handleSelect = () => {
+  goAddGroup(router, dropDownGroup.value.id);
+  showDropdownRef.value = false;
 };
 
 const handleClickoutside = () => {
@@ -62,6 +57,10 @@ const nodeProps = ({ option }: { option: TreeOption }) => {
           key: 'add',
           label: '添加子群组',
         },
+        {
+          key: 'view',
+          label: '查看群组信息',
+        },
       ];
       dropDownGroup.value = option;
       showDropdownRef.value = true;
@@ -84,7 +83,11 @@ const nodeProps = ({ option }: { option: TreeOption }) => {
     >
       <template #1>
         <NSpace vertical>
-          <NButton class="mr-2" type="primary" @click="() => goAddGroup(0)">
+          <NButton
+            class="mr-2"
+            type="primary"
+            @click="() => goAddGroup(router, 0)"
+          >
             添加群组
           </NButton>
           <NTree
@@ -102,8 +105,18 @@ const nodeProps = ({ option }: { option: TreeOption }) => {
       </template>
       <template #2>
         <Grid table-title="数据列表" table-title-help="提示">
+          <template #action>
+            <NSpace justify="center">
+              <NButton text type="primary">编辑</NButton>
+              <NButton text type="error">删除</NButton>
+            </NSpace>
+          </template>
           <template #toolbar-actions>
-            <NButton class="mr-2" type="primary" @click="() => gridApi.query()">
+            <NButton
+              class="mr-2"
+              type="primary"
+              @click="() => goAddUser(router)"
+            >
               添加用户
             </NButton>
           </template>

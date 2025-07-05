@@ -1,6 +1,6 @@
 import type { VxeGridProps } from '@vben/plugins/vxe-table';
 
-import { getUserListApi } from '#/api';
+import { getGroupsApi } from '#/api/core/group';
 
 export const gridOptions: VxeGridProps = {
   checkboxConfig: {
@@ -8,32 +8,34 @@ export const gridOptions: VxeGridProps = {
     labelField: 'name',
   },
   columns: [
-    // { title: '序号', type: 'seq', width: 50 },
+    { title: '序号', type: 'seq', width: 50 },
     // { align: 'left', title: 'Name', type: 'checkbox', width: 100 },
-    { field: 'id', sortable: false, title: 'Id', width: 50 },
-    { field: 'number', sortable: false, title: 'Number' },
+    { field: 'id', sortable: false, title: 'Id', width: 80, treeNode: true },
     { field: 'name', sortable: false, title: 'Name' },
-    { field: 'email', sortable: false, title: 'Email' },
-    { field: 'phone', sortable: false, title: 'Phone' },
+    // { field: 'defaultRoles', sortable: false, title: 'DefaultRoles' },
+    { field: 'parentId', sortable: false, title: 'ParentId' },
+    { field: 'topId', sortable: false, title: 'topId' },
+    { field: 'parentChain', sortable: false, title: 'parentChain' },
     {
       field: 'action',
       fixed: 'right',
       slots: { default: 'action' },
       title: '操作',
-      width: 120,
+      width: 300,
     },
   ],
   exportConfig: {},
   height: 'auto',
-  keepSource: true,
+  // keepSource: true,
   proxyConfig: {
     ajax: {
       query: async ({ page, sort }) => {
-        return await getUserListApi({
+        return await getGroupsApi({
           page: page.currentPage,
           pageSize: page.pageSize,
           sortBy: sort.field,
           sortOrder: sort.order,
+          returnType: 'flat',
         });
       },
     },
@@ -42,6 +44,12 @@ export const gridOptions: VxeGridProps = {
   sortConfig: {
     defaultSort: { field: 'category', order: 'desc' },
     remote: true,
+  },
+  treeConfig: {
+    transform: true, // 指定表格为树形表格
+    parentField: 'parentId', // 父节点字段名
+    rowField: 'id', // 行数据字段名
+    showLine: true,
   },
   toolbarConfig: {
     custom: true,
@@ -52,8 +60,16 @@ export const gridOptions: VxeGridProps = {
   },
 };
 
-export const goAddUser = (router: any) => {
+export const goAddGroup = (router: any, parentId = 0) => {
   router.push({
-    name: 'AddUser',
+    name: 'AddGroup',
+    state: { parentId },
+  });
+};
+
+export const goEditGroup = (router: any, row: any) => {
+  router.push({
+    name: 'EditGroup',
+    params: { id: row.id },
   });
 };
