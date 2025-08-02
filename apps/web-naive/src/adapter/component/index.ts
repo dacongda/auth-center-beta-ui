@@ -63,6 +63,9 @@ const NTreeSelect = defineAsyncComponent(() =>
 const NUpload = defineAsyncComponent(() =>
   import('naive-ui/es/upload').then((res) => res.NUpload),
 );
+const NDynamicInput = defineAsyncComponent(() =>
+  import('naive-ui/es/dynamic-input').then((res) => res.NDynamicInput),
+);
 
 const withDefaultPlaceholder = <T extends Component>(
   component: T,
@@ -106,6 +109,7 @@ export type ComponentType =
   | 'CheckboxGroup'
   | 'DatePicker'
   | 'Divider'
+  | 'DynamicInput'
   | 'IconPicker'
   | 'Input'
   | 'InputNumber'
@@ -212,6 +216,7 @@ async function initComponentAdapter() {
     TimePicker: NTimePicker,
     TreeSelect: withDefaultPlaceholder(NTreeSelect, 'select'),
     Upload: NUpload,
+    DynamicInput: NDynamicInput,
   };
 
   // 将组件注册到全局共享状态中

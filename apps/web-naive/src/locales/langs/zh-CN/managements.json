@@ -1,9 +1,23 @@
 {
+  "account": "账号",
+  "addPasskey": "添加Passkey",
+  "add_application": "增加应用",
+  "add_cert": "添加证书",
   "add_group": "增加群组",
+  "add_provider": "添加提供商",
   "add_user": "增加用户",
+  "application_list": "应用管理",
+  "auth-safe": "认证与安全",
+  "cert_list": "证书管理",
+  "editAccount": "编辑个人信息",
+  "edit_application": "编辑应用",
+  "edit_cert": "编辑证书",
   "edit_group": "编辑群组",
+  "edit_provider": "编辑提供商",
   "edit_user": "编辑用户",
+  "enableMfa": "启用MFA",
   "group_list": "群组管理",
+  "provider_list": "提供商列表",
   "title": "管理列表",
   "user_list": "用户管理"
 }

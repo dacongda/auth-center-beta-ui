@@ -53,28 +53,28 @@ onMounted(() => {
 const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
   // 所有表单项共用，可单独在表单内覆盖
   commonConfig: {
-    // 所有表单项
     componentProps: {
       class: 'w-full',
     },
   },
-  // 提交函数
   handleSubmit: onSubmit,
-  // 垂直布局，label和input在不同行，值为vertical
-  // 水平布局，label和input在同一行
   layout: 'horizontal',
   schema: [
     {
-      // 组件需要在 #/adapter.ts内注册，并加上类型
       component: 'Input',
-      // 对应组件的参数
       componentProps: {
         placeholder: '请输入群组名',
       },
-      // 字段名
       fieldName: 'name',
-      // 界面显示的label
       label: '群组名',
+    },
+    {
+      component: 'Input',
+      componentProps: {
+        placeholder: '请输入群组显示名',
+      },
+      fieldName: 'displayName',
+      label: '显示名',
     },
     {
       component: 'Select',

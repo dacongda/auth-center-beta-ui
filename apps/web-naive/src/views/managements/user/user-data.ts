@@ -1,59 +1,60 @@
 import type { VxeGridProps } from '@vben/plugins/vxe-table';
 
-import { getUserListApi } from '#/api';
-
-export const gridOptions: VxeGridProps = {
-  checkboxConfig: {
-    highlight: true,
-    labelField: 'name',
-  },
-  columns: [
-    // { title: '序号', type: 'seq', width: 50 },
-    // { align: 'left', title: 'Name', type: 'checkbox', width: 100 },
-    { field: 'id', sortable: false, title: 'Id', width: 50 },
-    { field: 'number', sortable: false, title: 'Number' },
-    { field: 'name', sortable: false, title: 'Name' },
-    { field: 'email', sortable: false, title: 'Email' },
-    { field: 'phone', sortable: false, title: 'Phone' },
-    {
-      field: 'action',
-      fixed: 'right',
-      slots: { default: 'action' },
-      title: '操作',
-      width: 120,
+export const getGridOptions = (userApi: any): VxeGridProps => {
+  return {
+    checkboxConfig: {
+      highlight: true,
+      labelField: 'name',
     },
-  ],
-  exportConfig: {},
-  height: 'auto',
-  keepSource: true,
-  proxyConfig: {
-    ajax: {
-      query: async ({ page, sort }) => {
-        return await getUserListApi({
-          page: page.currentPage,
-          pageSize: page.pageSize,
-          sortBy: sort.field,
-          sortOrder: sort.order,
-        });
+    columns: [
+      // { title: '序号', type: 'seq', width: 50 },
+      // { align: 'left', title: 'Name', type: 'checkbox', width: 100 },
+      { field: 'id', sortable: false, title: 'Id', width: 50 },
+      { field: 'number', sortable: false, title: 'Number' },
+      { field: 'name', sortable: false, title: 'Name' },
+      { field: 'email', sortable: false, title: 'Email' },
+      { field: 'phone', sortable: false, title: 'Phone' },
+      { field: 'groupName', sortable: false, title: 'Group' },
+      {
+        field: 'action',
+        fixed: 'right',
+        slots: { default: 'action' },
+        title: '操作',
+        width: 120,
       },
+    ],
+    exportConfig: {},
+    height: 'auto',
+    keepSource: true,
+    proxyConfig: {
+      ajax: {
+        query: userApi,
+      },
+      sort: true,
     },
-    sort: true,
-  },
-  sortConfig: {
-    defaultSort: { field: 'category', order: 'desc' },
-    remote: true,
-  },
-  toolbarConfig: {
-    custom: true,
-    export: true,
-    // import: true,
-    refresh: { code: 'query' },
-    zoom: true,
-  },
+    sortConfig: {
+      defaultSort: { field: 'category', order: 'desc' },
+      remote: true,
+    },
+    toolbarConfig: {
+      custom: true,
+      export: true,
+      // import: true,
+      refresh: { code: 'query' },
+      zoom: true,
+    },
+  };
 };
 
 export const goAddUser = (router: any) => {
   router.push({
     name: 'AddUser',
+  });
+};
+
+export const goEditUser = (router: any, row: any) => {
+  router.push({
+    name: 'EditUser',
+    params: { id: row.id },
   });
 };

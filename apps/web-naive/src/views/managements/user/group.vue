@@ -6,7 +6,7 @@ import { Page } from '@vben/common-ui';
 import { NButton, NPopconfirm, NSpace, NTooltip, useMessage } from 'naive-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteGroupApi, refreshGroupChain } from '#/api/core/group';
+import { deleteGroupApi, refreshGroupChainApi } from '#/api/core/group';
 
 import { goAddGroup, goEditGroup, gridOptions } from './group-data';
 
@@ -23,20 +23,20 @@ const handleDelete = (row: any) => {
 const [Grid, gridApi] = useVbenVxeGrid({ gridOptions });
 </script>
 <template>
-  <Page title="群组列表">
-    <Grid
-      table-title="数据列表"
-      table-title-help="提示"
-      style="max-height: 80vh"
-    >
+  <Page title="群组列表" auto-content-height>
+    <Grid table-title="数据列表" table-title-help="提示">
       <template #action="{ row }">
         <NSpace justify="center">
-          <NButton text type="primary"> 导入用户 </NButton>
-          <NButton text type="primary"> 详情 </NButton>
+          <NButton text type="success"> 导入用户 </NButton>
+          <!-- <NButton text type="primary"> 详情 </NButton> -->
           <NButton text type="primary" @click="goEditGroup(router, row)">
             编辑
           </NButton>
-          <NButton text type="primary" @click="() => goAddGroup(router)">
+          <NButton
+            text
+            type="primary"
+            @click="() => goAddGroup(router, row.id)"
+          >
             增加下属
           </NButton>
           <NPopconfirm @positive-click="handleDelete(row)">
@@ -65,7 +65,7 @@ const [Grid, gridApi] = useVbenVxeGrid({ gridOptions });
         <NButton
           class="mr-2"
           @click="
-            refreshGroupChain().then(() => {
+            refreshGroupChainApi().then(() => {
               message.success('成功');
               gridApi.reload();
             })

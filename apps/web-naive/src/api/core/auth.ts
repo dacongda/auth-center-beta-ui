@@ -5,6 +5,9 @@ export namespace AuthApi {
   export interface LoginParams {
     password?: string;
     username?: string;
+    name?: string;
+    loginMethod?: string;
+    groupName?: string;
   }
 
   /** 登录接口返回值 */
@@ -23,7 +26,7 @@ export namespace AuthApi {
  * 登录
  */
 export async function loginApi(data: AuthApi.LoginParams, query = {}) {
-  return baseRequest2Client.post<AuthApi.LoginResult>('/user/login', data, {
+  return baseRequest2Client.post<AuthApi.LoginResult>('/auth/login', data, {
     params: query,
   });
 }
@@ -51,4 +54,11 @@ export async function logoutApi() {
  */
 export async function getAccessCodesApi() {
   return [];
+}
+
+/**
+ * 验证用户
+ */
+export async function verifyUser(data: AuthApi.LoginParams) {
+  return baseRequest2Client.post('/auth/verifyUser', data);
 }

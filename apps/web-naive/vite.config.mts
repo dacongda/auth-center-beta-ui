@@ -12,16 +12,16 @@ export default defineConfig(async () => {
             target: 'http://localhost:5195/',
             ws: true,
           },
-          '/api': {
+          '/rapi2': {
             changeOrigin: true,
-            rewrite: (path) => path.replace(/^\/api/, ''),
+            rewrite: (path) => path.replace(/^\/rapi2/, ''),
             // mock代理目标地址
             target: 'http://localhost:5320/api',
             ws: true,
           },
-          '/rapi2': {
+          '/api': {
             changeOrigin: true,
-            rewrite: (path) => path.replace(/^\/rapi2/, ''),
+            rewrite: (path) => path.replace(/^\/api/, ''),
             target: 'http://localhost:5195/api',
             ws: true,
           },

@@ -45,6 +45,15 @@ export async function deleteGroupApi(params: any) {
 /**
  * 刷新群组链
  */
-export async function refreshGroupChain() {
+export async function refreshGroupChainApi() {
   return baseRequest2Client.get('/group/refreshGroupChain');
+}
+
+/**
+ * 获取群组与应用
+ */
+export async function getGroupWithApplicationApi(params: any) {
+  return baseRequest2Client.get('/group/getGroupWithApplication', {
+    params,
+  });
 }

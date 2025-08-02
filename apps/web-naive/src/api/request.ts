@@ -105,12 +105,12 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   return client;
 }
 
-export const requestClient = createRequestClient(apiURL, {
+export const requestClient = createRequestClient('/rapi2', {
   responseReturn: 'data',
 });
 
-export const baseRequest2Client = createRequestClient(`/rapi2`, {
+export const baseRequest2Client = createRequestClient(apiURL, {
   responseReturn: 'data',
 });
 
-export const baseRequestClient = new RequestClient({ baseURL: apiURL });
+export const baseRequestClient = new RequestClient({ baseURL: '/rapi2' });

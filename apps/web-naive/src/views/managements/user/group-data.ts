@@ -50,6 +50,7 @@ export const gridOptions: VxeGridProps = {
     parentField: 'parentId', // 父节点字段名
     rowField: 'id', // 行数据字段名
     showLine: true,
+    expandAll: true,
   },
   toolbarConfig: {
     custom: true,

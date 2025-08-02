@@ -9,18 +9,31 @@ import { Page } from '@vben/common-ui';
 import { NButton, NDropdown, NSpace, NSplit, NTree } from 'naive-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
+import { getUserListApi } from '#/api';
 import { getGroupTreeApi } from '#/api/core/group';
 
 import { goAddGroup } from './group-data';
-import { goAddUser, gridOptions } from './user-data';
+import { getGridOptions, goAddUser, goEditUser } from './user-data';
 
-const [Grid, gridApi] = useVbenVxeGrid({ gridOptions });
+const userApi = async ({ page, sort }: any) => {
+  return await getUserListApi({
+    page: page.currentPage,
+    pageSize: page.pageSize,
+    sortBy: sort.field,
+    sortOrder: sort.order,
+    parentChain: currentParentChain.value,
+  });
+};
+const [Grid, gridApi] = useVbenVxeGrid({
+  gridOptions: getGridOptions(userApi),
+});
 
 const groupXRef = ref(0);
 const groupYRef = ref(0);
 const showDropdownRef = ref(false);
 const dropDownGroup = ref();
 const optionsRef = ref();
+const currentParentChain = ref();
 
 const router = useRouter();
 
@@ -49,7 +62,8 @@ onMounted(() => {
 const nodeProps = ({ option }: { option: TreeOption }) => {
   return {
     onClick: () => {
-      window.console.log(option);
+      currentParentChain.value = option.parentChain;
+      gridApi.query();
     },
     onContextmenu(e: MouseEvent): void {
       optionsRef.value = [
@@ -72,15 +86,9 @@ const nodeProps = ({ option }: { option: TreeOption }) => {
 };
 </script>
 <template>
-  <Page title="用户列表">
+  <Page title="用户列表" auto-content-height>
     <template #extra> </template>
-    <NSplit
-      direction="horizontal"
-      style="max-height: 80vh"
-      :default-size="0.15"
-      :max="0.75"
-      :min="0.1"
-    >
+    <NSplit direction="horizontal" :default-size="0.15" :max="0.75" :min="0.1">
       <template #1>
         <NSpace vertical>
           <NButton
@@ -105,9 +113,11 @@ const nodeProps = ({ option }: { option: TreeOption }) => {
       </template>
       <template #2>
         <Grid table-title="数据列表" table-title-help="提示">
-          <template #action>
+          <template #action="{ row }">
             <NSpace justify="center">
-              <NButton text type="primary">编辑</NButton>
+              <NButton text type="primary" @click="goEditUser(router, row)">
+                编辑
+              </NButton>
               <NButton text type="error">删除</NButton>
             </NSpace>
           </template>

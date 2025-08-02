@@ -237,5 +237,8 @@
     "nolebase",
     "rollup",
     "vitest"
-  ]
+  ],
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  }
 }

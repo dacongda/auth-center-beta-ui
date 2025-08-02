@@ -10,6 +10,20 @@ export async function getUserInfoApi() {
 }
 
 /**
+ * 获取登陆用户信息
+ */
+export async function getMyInfoApi() {
+  return baseRequest2Client.get('/user/myInfo');
+}
+
+/**
+ * 根据ID获取用户信息
+ */
+export async function getUserApi(params: any) {
+  return baseRequest2Client.get<UserInfo>('/user', { params });
+}
+
+/**
  * 获取用户列表
  */
 export async function getUserListApi(params: any) {
