@@ -1,18 +1,15 @@
 <script setup lang="tsx">
-import type { StepsProps } from 'naive-ui';
+import type { CountdownProps, StepsProps } from 'naive-ui';
 
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { MaterialSymbolsPasskey } from '@vben/icons';
-import { useUserStore } from '@vben/stores';
-
 import {
   NButton,
   NCard,
+  NCountdown,
   NGrid,
   NGridItem,
-  NIcon,
   NInput,
   NInputOtp,
   NQrCode,
@@ -23,13 +20,7 @@ import {
 
 import { message } from '#/adapter/naive';
 import { enableMfaApi, enableMfaSetupApi } from '#/api/core/mfa';
-import {
-  createAssertionApi,
-  getAssertionOptionsApi,
-} from '#/api/core/webAuthn';
-
-import { verifyUser } from '../../api/core/auth';
-import { coerceToArrayBuffer, coerceToBase64Url } from '../utils/webAuthn';
+import VerifyUserPanel from '#/components/verify-user-panel.vue';
 
 const currentRef = ref<number>(1);
 const currentStatus = ref<StepsProps['status']>('process');
@@ -37,10 +28,6 @@ const currentStatus = ref<StepsProps['status']>('process');
 const route = useRoute();
 const router = useRouter();
 const mfaType = route.params?.mfaType;
-const authMode = ref('Password');
-const password = ref('');
-
-const user = useUserStore();
 
 const totpUri = ref('Hello world');
 const totpSecret = ref('');
@@ -48,73 +35,30 @@ const mfaEnableId = ref('');
 const otpArray = ref([]);
 
 const recoveryCode = ref('');
+const curVerifyId = ref('');
 
-const onVerifyUser = async () => {
-  if (authMode.value === 'Passkey') {
-    const { options, optionId } = await getAssertionOptionsApi({
-      number: user.userInfo?.userId,
-    });
+const duration = ref(60_000);
+const countActive = ref(true);
 
-    options.challenge = coerceToArrayBuffer(options.challenge, 'challenge');
-    options.allowCredentials.forEach((listItem: any) => {
-      listItem.id = coerceToArrayBuffer(listItem.id, 'listItemId');
-    });
+const onVerifyUser = async (verifyId: any) => {
+  curVerifyId.value = verifyId;
+  reSetupMfa();
+};
 
-    const credential: any = await navigator.credentials
-      .get({
-        publicKey: options,
-      })
-      .catch(() => {
-        message.error('操作取消');
-      });
-
-    const authData = new Uint8Array(credential.response.authenticatorData);
-    const clientDataJSON = new Uint8Array(credential.response.clientDataJSON);
-    const rawId = new Uint8Array(credential.rawId);
-    const sig = new Uint8Array(credential.response.signature);
-    const userHandle = new Uint8Array(credential.response.userHandle);
-    const data = {
-      id: credential.id,
-      rawId: coerceToBase64Url(rawId),
-      type: credential.type,
-      extensions: credential.getClientExtensionResults(),
-      response: {
-        authenticatorData: coerceToBase64Url(authData),
-        clientDataJSON: coerceToBase64Url(clientDataJSON),
-        userHandle: userHandle === null ? null : coerceToBase64Url(userHandle),
-        signature: coerceToBase64Url(sig),
-      },
-    };
-
-    try {
-      const { webAuthLoginId } = await createAssertionApi({
-        requestValue: data,
-        cacheOptionId: optionId,
-        authType: 'verify',
-      });
-      password.value = webAuthLoginId;
-    } catch {
-      return;
-    }
-  }
-
-  const { verifyId } = await verifyUser({
-    name: user.userInfo?.userId,
-    groupName: ' ',
-    password: password.value,
-    loginMethod: authMode.value,
-  });
-
+const reSetupMfa = async () => {
   const res = await enableMfaSetupApi({
     requestValue: mfaType,
-    cacheOptionId: verifyId,
+    cacheOptionId: curVerifyId.value,
   });
 
-  currentRef.value = currentRef.value + 1;
+  currentRef.value = 2;
 
   totpUri.value = res?.totpUri;
   totpSecret.value = res?.secret;
   mfaEnableId.value = res?.mfaEnableId;
+
+  duration.value = 60 * 1000;
+  countActive.value = true;
 };
 
 const enableMfa = async () => {
@@ -134,6 +78,15 @@ const enableMfa = async () => {
   } catch {
     message.error('验证失败');
   }
+};
+
+const countRender: CountdownProps['render'] = (props: {
+  hours: number;
+  milliseconds: number;
+  minutes: number;
+  seconds: number;
+}) => {
+  return (props.minutes * 60 + props.seconds).toString().padStart(2, '0');
 };
 </script>
 <template>
@@ -163,49 +116,48 @@ const enableMfa = async () => {
 
         <!-- Auth form -->
         <NCard class="mt-6">
-          <template v-if="currentRef === 1">
-            <div v-if="authMode === 'Password'">
-              密码验证
-              <NInput type="password" v-model:value="password" />
-            </div>
-            <NSpace
-              vertical
-              align="center"
-              justify="center"
-              v-if="authMode === 'Passkey'"
-            >
-              <NIcon size="80"><MaterialSymbolsPasskey /></NIcon>
-              <p>使用Passkey验证</p>
-            </NSpace>
-            <NButton @click="onVerifyUser" type="primary" class="mt-2" block>
-              验证
-            </NButton>
-            <div class="m-2">
-              <li v-if="authMode !== 'Passkey'">
-                <NButton type="primary" text @click="authMode = 'Passkey'">
-                  使用Passkey登陆
-                </NButton>
-              </li>
-              <li v-if="authMode !== 'Password'">
-                <NButton type="primary" text @click="authMode = 'Password'">
-                  使用密码登陆
-                </NButton>
-              </li>
-            </div>
-          </template>
+          <VerifyUserPanel
+            v-if="currentRef === 1"
+            type="MFA"
+            @after-verify-user="onVerifyUser"
+          />
           <template v-if="currentRef === 2">
             <NSpace vertical class="text-center" align="stretch">
-              <NQrCode
-                style="width: auto; height: auto"
-                :size="200"
-                :value="totpUri"
-              />
-              <NInput
-                style="justify-content: center"
-                :value="totpSecret"
-                readonly
-              />
-              请输入设备中显示的验证码
+              <template v-if="mfaType === 'TOTP'">
+                <NQrCode
+                  style="width: auto; height: auto"
+                  :size="200"
+                  :value="totpUri"
+                />
+                <NInput
+                  style="justify-content: center"
+                  :value="totpSecret"
+                  readonly
+                />
+                请输入设备中显示的验证码
+              </template>
+              <template v-if="mfaType === 'Email'">
+                <p>验证码已发送至您的邮箱</p>
+                <NButton
+                  :disabled="countActive"
+                  type="primary"
+                  secondary
+                  @click="reSetupMfa"
+                >
+                  点击重新发送
+                  <NCountdown
+                    v-if="countActive"
+                    :render="countRender"
+                    :duration="duration"
+                    :active="countActive"
+                    :on-finish="
+                      () => {
+                        countActive = false;
+                      }
+                    "
+                  />
+                </NButton>
+              </template>
               <NInputOtp
                 style="justify-content: center"
                 @finish="enableMfa"
@@ -223,11 +175,7 @@ const enableMfa = async () => {
               </p>
             </template>
             <p v-else>您已保存过救援代码，可从密码与安全页面查看并下载</p>
-            <NButton
-              type="primary"
-              block
-              @click="router.push({ name: 'EditAccount' })"
-            >
+            <NButton type="primary" block @click="router.go(-1)">
               完成
             </NButton>
           </template>

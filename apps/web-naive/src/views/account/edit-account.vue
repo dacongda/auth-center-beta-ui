@@ -1,7 +1,8 @@
 <script lang="tsx" setup>
 import type { MenuOption } from 'naive-ui';
 
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
@@ -10,6 +11,7 @@ import {
   NGridItem,
   NLayout,
   NLayoutContent,
+  NLayoutHeader,
   NLayoutSider,
   NMenu,
 } from 'naive-ui';
@@ -21,7 +23,11 @@ import { getFlatGroupTree, getRolesByParentChain } from '../utils';
 import EditBasicInfo from './edit-basic-info.vue';
 import EditSafeInfo from './edit-safe-info.vue';
 
-const menuKey = ref('basicInfo');
+const router = useRouter();
+const route = useRoute();
+
+const menuKey: any = computed(() => route.params?.path);
+
 const myInfo = ref();
 const groupTree = ref();
 const groupFlat = ref();
@@ -29,13 +35,18 @@ const userInheritRoles = ref();
 const menuOptions: MenuOption[] = [
   {
     label: '基础信息',
-    key: 'basicInfo',
+    key: 'BasicInfo',
   },
   {
     label: '密码与安全',
-    key: 'safe',
+    key: 'SafeInfo',
   },
 ];
+
+const windowWidth = ref(0);
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
 
 onMounted(async () => {
   await getMyInfoApi().then((res) => {
@@ -62,14 +73,38 @@ onMounted(async () => {
       group?.parentChain,
     );
   });
+
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(async () => {
+  window.removeEventListener('resize', handleResize);
+});
+
+const handleUpdateMenu = (key: string) => {
+  router.push({ name: 'EditAccount', params: { path: key } });
+};
+
+const updateUserInfo = async () => {
+  await getMyInfoApi().then((res) => {
+    myInfo.value = res;
+  });
+};
+
+const diaplaySidebar = computed(() => {
+  return windowWidth.value > 1024;
 });
 </script>
 <template>
   <Page title="编辑个人信息" auto-content-height>
     <NGrid item-responsive cols="8" responsive="screen">
       <NGridItem span="8 m:6 l:6" offset="0 m:1 l:1">
-        <NLayout style="height: 80vh; border-radius: 0.5rem" has-sider>
+        <NLayout
+          style="height: 80vh; border-radius: 0.5rem"
+          :has-sider="diaplaySidebar"
+        >
           <NLayoutSider
+            v-if="diaplaySidebar"
             bordered
             collapse-mode="width"
             :collapsed-width="64"
@@ -77,21 +112,32 @@ onMounted(async () => {
             show-trigger
           >
             <NMenu
-              v-model:value="menuKey"
+              :value="menuKey"
               :options="menuOptions"
               default-value="basicInfo"
+              @update-value="handleUpdateMenu"
             />
           </NLayoutSider>
+          <NLayoutHeader v-if="!diaplaySidebar">
+            <NMenu
+              mode="horizontal"
+              :value="menuKey"
+              :options="menuOptions"
+              default-value="basicInfo"
+              @update-value="handleUpdateMenu"
+            />
+          </NLayoutHeader>
           <NLayoutContent>
             <EditBasicInfo
               v-model:user-info="myInfo"
               :inherit-roles="userInheritRoles"
               :groups="groupFlat"
-              v-if="menuKey === 'basicInfo'"
+              v-if="menuKey === 'BasicInfo'"
             />
             <EditSafeInfo
               v-model:user-info="myInfo"
-              v-if="menuKey === 'safe'"
+              v-if="menuKey === 'SafeInfo'"
+              @update-user-info="updateUserInfo"
             />
           </NLayoutContent>
         </NLayout>

@@ -25,7 +25,7 @@ const { destroyWatermark, updateWatermark } = useWatermark();
 const menus = computed(() => [
   {
     handler: () => {
-      router.push({ name: 'EditAccount' });
+      router.push({ name: 'EditAccount', params: { path: 'BasicInfo' } });
     },
     icon: MaterialSymbolsEditNoteSharp,
     text: $t('ui.widgets.user_setting'),

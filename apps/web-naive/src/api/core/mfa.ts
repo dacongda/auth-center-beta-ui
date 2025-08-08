@@ -13,3 +13,10 @@ export async function enableMfaSetupApi(data: any) {
 export async function enableMfaApi(data: any) {
   return baseRequest2Client.post('/mfa/enableMfaVerify', data);
 }
+
+/**
+ * 关闭mfa
+ */
+export async function disableMfaApi(data: any) {
+  return baseRequest2Client.post('/mfa/disableMfaVerify', data);
+}

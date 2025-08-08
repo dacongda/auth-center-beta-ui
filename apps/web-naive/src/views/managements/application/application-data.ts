@@ -72,4 +72,7 @@ export const providerRule: any = {
       { label: '字母与数字', value: 'Letter' },
     ],
   },
+  Email: {
+    SMTP: [{ label: '默认', value: 'Default' }],
+  },
 };

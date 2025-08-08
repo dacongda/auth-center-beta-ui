@@ -12,15 +12,18 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'Account',
     path: '/account',
+    redirect: '/account/editAccount/BasicInfo',
     children: [
       {
         name: 'EditAccount',
-        path: 'editAccount',
+        path: 'editAccount/:path',
         component: () => import('#/views/account/edit-account.vue'),
         meta: {
           hideInMenu: true,
           icon: 'lucide:area-chart',
           title: $t('managements.editAccount'),
+          menuKey: 'editAccount',
+          keepAlive: true,
         },
       },
       {

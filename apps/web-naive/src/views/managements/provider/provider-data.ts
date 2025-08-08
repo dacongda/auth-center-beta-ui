@@ -92,7 +92,7 @@ export const providerFieldArray: any = {
       { name: 'configureUrl', label: 'OIDC Discovery' },
     ],
   },
-  Mail: {
+  Email: {
     SMTP: [
       { name: 'clientId', label: '用户名' },
       { name: 'clientSecret', label: '密码' },

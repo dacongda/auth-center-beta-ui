@@ -11,6 +11,10 @@ interface BasicUserInfo {
    */
   id: number;
   /**
+   * 当前应用
+   */
+  loginApplication: any;
+  /**
    * 用户昵称
    */
   realName: string;

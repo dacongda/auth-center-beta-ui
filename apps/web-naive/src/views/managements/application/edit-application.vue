@@ -130,7 +130,7 @@ const handleProvierItemUpdate = (value: any, index: number) => {
   const provider = providerList.value?.find((el: any) => el.id === value);
   window.console.log(provider);
   appFormValue.value.providerItems[index].type = provider?.type;
-  appFormValue.value.providerItems[index].id = value;
+  appFormValue.value.providerItems[index].providerId = value;
 };
 
 const downloadLink = () => {
@@ -284,7 +284,7 @@ const getProviderRule = (id: any) => {
                 v-model:value="appFormValue.value.providerItems"
                 :on-create="
                   () => {
-                    return { id: null, type: '', rule: '' };
+                    return { providerId: null, type: '', rule: '' };
                   }
                 "
               >
@@ -294,7 +294,7 @@ const getProviderRule = (id: any) => {
                   return { label: el.name, value: el.id, type: el.type };
                 })"
                     placeholder="请选择提供商"
-                    v-model:value="value.id"
+                    v-model:value="value.providerId"
                     :on-update:value="
                       (val :any) => {return handleProvierItemUpdate(val, index)}
                     "

@@ -8,6 +8,7 @@ export namespace AuthApi {
     name?: string;
     loginMethod?: string;
     groupName?: string;
+    type?: string;
   }
 
   /** 登录接口返回值 */
@@ -61,4 +62,11 @@ export async function getAccessCodesApi() {
  */
 export async function verifyUser(data: AuthApi.LoginParams) {
   return baseRequest2Client.post('/auth/verifyUser', data);
+}
+
+/**
+ * 获取验证码
+ */
+export async function sendVerificationCodeApi(data: any) {
+  return baseRequest2Client.post('/auth/sendVerificationCode', data);
 }

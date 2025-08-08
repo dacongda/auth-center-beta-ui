@@ -233,7 +233,7 @@ if (enableShortcutKey.value) {
           <VbenIcon :icon="menu.icon" class="mr-2 size-4" />
           {{ menu.text }}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        <!-- <DropdownMenuSeparator /> -->
         <!-- <DropdownMenuItem
           v-if="preferences.widget.lockScreen"
           class="mx-1 flex cursor-pointer items-center rounded-sm py-1 leading-8"

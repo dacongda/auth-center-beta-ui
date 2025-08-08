@@ -50,3 +50,10 @@ export async function updateUserApi(data: any) {
 export async function removeUserApi(params: any) {
   return baseRequest2Client.delete('/user', { params });
 }
+
+/**
+ * 修改用户安全信息
+ */
+export async function updateUserSafeInfoApi(data: any) {
+  return baseRequest2Client.post('/user/updateSafeInfo', data);
+}
