@@ -21,10 +21,24 @@
     "refreshAriaLabel": "Refresh captcha",
     "sliderDefaultText": "Slider and drag",
     "sliderRotateDefaultTip": "Click picture to refresh",
+    "sliderTranslateDefaultTip": "Click picture to refresh",
     "sliderRotateFailTip": "Validation failed",
     "sliderRotateSuccessTip": "Validation successful, time {0} seconds",
-    "sliderSuccessText": "Passed",
-    "title": "Please complete the security verification"
+    "sliderTranslateFailTip": "Validation failed",
+    "sliderTranslateSuccessTip": "Validation successful, time {0} seconds",
+    "refreshAriaLabel": "Refresh captcha",
+    "confirmAriaLabel": "Confirm selection",
+    "confirm": "Confirm",
+    "pointAriaLabel": "Click point",
+    "clickInOrder": "Please click in order"
+  },
+  "iconPicker": {
+    "placeholder": "Select an icon",
+    "search": "Search icon..."
+  },
+  "jsonViewer": {
+    "copy": "Copy",
+    "copied": "Copied"
   },
   "fallback": {
     "comingSoon": "Coming Soon",
