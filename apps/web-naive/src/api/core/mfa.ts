@@ -20,3 +20,10 @@ export async function enableMfaApi(data: any) {
 export async function disableMfaApi(data: any) {
   return baseRequest2Client.post('/mfa/disableMfaVerify', data);
 }
+
+/**
+ * 设置MFA首选项
+ */
+export async function SetPreferredMfaApi(data: any) {
+  return baseRequest2Client.post('/mfa/SetPreferredMfa', data);
+}

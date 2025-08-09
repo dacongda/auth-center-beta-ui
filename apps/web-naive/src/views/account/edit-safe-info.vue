@@ -25,7 +25,7 @@ import {
 
 import { message } from '#/adapter/naive';
 import { sendVerificationCodeApi, updateUserSafeInfoApi } from '#/api';
-import { disableMfaApi } from '#/api/core/mfa';
+import { disableMfaApi, SetPreferredMfaApi } from '#/api/core/mfa';
 import {
   getUserCredentialsApi,
   removeCredApi,
@@ -46,6 +46,8 @@ interface UserBasicInfo {
   enableTotpMfa?: boolean;
   enableEmailMfa?: boolean;
   enablePhoneMfa?: boolean;
+  preferredMfaType?: string;
+  loginApplication?: number;
 }
 const userinfo = defineModel<UserBasicInfo>('userInfo', { default: {} });
 
@@ -94,6 +96,12 @@ const handleRemovePasskey = async (id: any) => {
   } catch {
     message.error('删除失败');
   }
+};
+
+const handleSetPrefered = async (mfaType: string) => {
+  await SetPreferredMfaApi({ preferredMfa: mfaType });
+  message.success('设置成功');
+  emit('updateUserInfo');
 };
 
 const handleDisableMfa = async (verifyId: any) => {
@@ -154,12 +162,13 @@ const hasEmailProvider =
     (el: any) => el.type === 'Email',
   ).length !== 0;
 
-const resendCode = async () => {
+const resendCode = async (captchaInfo: any, captchaCode: string) => {
   const { mfaEnableId } = await sendVerificationCodeApi({
-    requestValue:
+    destination:
       curModifyItem.value === 'Email' ? safeForm.email : safeForm.phone,
-    cacheOptionId: 'V',
     authType: curModifyItem.value,
+    captchaId: captchaInfo.captchaId,
+    captchaCode,
   });
 
   safeForm.codeId = mfaEnableId;
@@ -178,6 +187,24 @@ const safeItems = [
   {
     label: '密码',
     value: 'Password',
+  },
+];
+
+const mfaItems = [
+  {
+    label: 'TOTP',
+    value: 'TOTP',
+    infoField: 'enableTotpMfa',
+  },
+  {
+    label: '邮件',
+    value: 'Email',
+    infoField: 'enableEmailMfa',
+  },
+  {
+    label: '短信',
+    value: 'Phone',
+    infoField: 'enablePhoneMfa',
   },
 ];
 </script>
@@ -218,6 +245,7 @@ const safeItems = [
                 v-model:value="safeForm.phone"
                 v-model:code="safeForm.code"
                 :resend="resendCode"
+                :application-id="userinfo.loginApplication"
                 :disable-code-input="!hasPhoneProvider"
               />
               <SendCode
@@ -226,6 +254,7 @@ const safeItems = [
                 :disable-code-input="!hasEmailProvider"
                 v-model:value="safeForm.email"
                 v-model:code="safeForm.code"
+                :application-id="userinfo.loginApplication"
                 :resend="resendCode"
               />
               <template v-if="item.value === 'Password'">
@@ -343,91 +372,54 @@ const safeItems = [
     <NH2>双因素认证</NH2>
     <NText style="font-size: medium; font-weight: bold"> 认证项列表 </NText>
     <NList bordered>
-      <NListItem>
-        TOTP
-        <template v-if="userInfo?.enableTotpMfa">
-          <NTag type="success">已配置</NTag>
-        </template>
+      <NListItem v-for="(item, idx) in mfaItems" :key="idx">
+        <NSpace align="center">
+          <NText>{{ item.label }}</NText>
+          <NTag
+            type="success"
+            v-if="(userinfo as Record<string, any>)[item.infoField]"
+          >
+            已配置
+          </NTag>
+          <NTag type="info" v-if="userinfo?.preferredMfaType === item.value">
+            首选项
+          </NTag>
+        </NSpace>
         <template #suffix>
           <NButton
-            v-if="!userInfo?.enableTotpMfa"
+            v-if="!(userinfo as Record<string, any>)[item.infoField]"
             secondary
             type="primary"
             @click="
-              router.push({ name: 'EnableMfa', params: { mfaType: 'TOTP' } })
+              router.push({
+                name: 'EnableMfa',
+                params: { mfaType: item.value },
+              })
             "
           >
             启用
           </NButton>
-          <NButton
-            v-else
-            secondary
-            type="error"
-            @click="
-              ((showVerifyModal = true),
-              (curDisableMfa = 'TOTP'),
-              (curModifyItem = 'MFA'))
-            "
-          >
-            关闭
-          </NButton>
-        </template>
-      </NListItem>
-      <NListItem>
-        邮件
-        <template v-if="userInfo?.enableEmailMfa">
-          <NTag type="success">已配置</NTag>
-        </template>
-        <template #suffix>
-          <NButton
-            v-if="!userInfo?.enableEmailMfa"
-            secondary
-            type="primary"
-            @click="
-              router.push({ name: 'EnableMfa', params: { mfaType: 'Email' } })
-            "
-          >
-            启用
-          </NButton>
-          <NButton
-            v-else
-            secondary
-            type="error"
-            @click="
-              ((showVerifyModal = true),
-              (curDisableMfa = 'Email'),
-              (curModifyItem = 'MFA'))
-            "
-          >
-            关闭
-          </NButton>
-        </template>
-      </NListItem>
-      <NListItem>
-        短信
-        <template #suffix>
-          <NButton
-            v-if="!userInfo?.enablePhoneMfa"
-            secondary
-            type="primary"
-            @click="
-              router.push({ name: 'EnableMfa', params: { mfaType: 'Phone' } })
-            "
-          >
-            启用
-          </NButton>
-          <NButton
-            v-else
-            secondary
-            type="error"
-            @click="
-              ((showVerifyModal = true),
-              (curDisableMfa = 'Phone'),
-              (curModifyItem = 'MFA'))
-            "
-          >
-            关闭
-          </NButton>
+          <NSpace v-else style="width: max-content">
+            <NButton
+              v-if="userInfo?.preferredMfaType !== item.value"
+              secondary
+              type="info"
+              @click="handleSetPrefered(item.value)"
+            >
+              设为首选
+            </NButton>
+            <NButton
+              secondary
+              type="error"
+              @click="
+                ((showVerifyModal = true),
+                (curDisableMfa = item.value),
+                (curModifyItem = 'MFA'))
+              "
+            >
+              关闭
+            </NButton>
+          </NSpace>
         </template>
       </NListItem>
     </NList>

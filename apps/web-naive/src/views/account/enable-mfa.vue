@@ -62,8 +62,7 @@ const reSetupMfa = async () => {
 };
 
 const enableMfa = async () => {
-  let otpValue = '';
-  otpArray.value.forEach((el) => (otpValue += el));
+  const otpValue = otpArray.value.join('');
   try {
     const res = await enableMfaApi({
       authType: mfaType,

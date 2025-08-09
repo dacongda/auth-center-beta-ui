@@ -68,7 +68,7 @@ export const goEditProvider = (router: any, row: any) => {
 
 export const providerTypes: any = {
   Captcha: ['Default', 'Aliyun'],
-  Mail: ['SMTP'],
+  Email: ['SMTP'],
   Auth: ['OIDC', 'SAML'],
 };
 

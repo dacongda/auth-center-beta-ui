@@ -306,7 +306,7 @@ const getProviderRule = (id: any) => {
                   />
                   <NSelect
                     multiple
-                    :options="getProviderRule(value.id)"
+                    :options="getProviderRule(value.providerId)"
                     placeholder="请选择规则"
                     v-model:value="value.rule"
                   />

@@ -57,6 +57,14 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'MfaVerify',
+        path: 'mfaVerify',
+        component: () => import('#/views/_core/authentication/mfa-verify.vue'),
+        meta: {
+          title: $t('page.mfa_verify'),
+        },
+      },
+      {
         name: 'SAMLLogin',
         path: 'login-saml/:clientId',
         component: () => import('#/views/_core/authentication/login.vue'),

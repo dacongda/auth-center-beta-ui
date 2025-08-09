@@ -1,21 +1,20 @@
 <script setup lang="tsx">
 import type { CountdownProps } from 'naive-ui';
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
-import {
-  NButton,
-  NCountdown,
-  NInput,
-  NInputGroup,
-  NInputOtp,
-  NSelect,
-  NSpace,
-} from 'naive-ui';
+import { NButton, NCountdown, NInput, NInputOtp, NSpace } from 'naive-ui';
 
-import { countryRegionList } from './country-code';
+import { getCaptcha } from '#/api/core/captcha';
+import PhoneInput from '#/components/phone-input.vue';
 
-const props = defineProps(['type', 'disableCodeInput', 'resend']);
+const props = defineProps([
+  'type',
+  'disableCodeInput',
+  'resend',
+  'applicationId',
+  'disableDestination',
+]);
 
 const code = defineModel<string>('code');
 const value = defineModel<string>('value');
@@ -23,6 +22,8 @@ const value = defineModel<string>('value');
 const duration = ref(0);
 const countActive = ref(true);
 const isLoading = ref(false);
+const captchaInfo: any = ref();
+const captchaCode = ref('');
 
 const countRender: CountdownProps['render'] = (props: {
   hours: number;
@@ -36,7 +37,7 @@ const countRender: CountdownProps['render'] = (props: {
 const handleOnResend = async () => {
   try {
     isLoading.value = true;
-    await props.resend();
+    await props.resend(captchaInfo.value, captchaCode.value);
 
     duration.value = 60_000;
     countActive.value = true;
@@ -45,41 +46,50 @@ const handleOnResend = async () => {
   }
 };
 
-const countryRegionOption = countryRegionList.map((el) => {
-  return {
-    name: `+${el.tel} (${el.short_upper})`,
-    tel: `+${el.tel}`,
-  };
+onMounted(() => {
+  renewCaptcha();
 });
 
-const telCountryCode = ref('+86');
-const telNumber = ref('');
-
-const handleTelUpdate = () => {
-  value.value = `${telCountryCode.value} ${telNumber.value}`;
+const renewCaptcha = async () => {
+  captchaInfo.value = await getCaptcha({
+    applicationId: props.applicationId,
+  });
 };
 </script>
 <template>
   <NSpace vertical>
-    <NInputGroup v-if="props.type === 'Phone'" class="m-2">
-      <NSelect
-        label-field="name"
-        value-field="tel"
-        :options="countryRegionOption"
-        v-model:value="telCountryCode"
-        filterable
-        style="width: 200px"
-        @update:value="handleTelUpdate"
+    <template v-if="!props.disableDestination">
+      <PhoneInput
+        v-model:value="value"
+        v-if="props.type === 'Phone'"
+        class="m-2"
       />
-      <NInput v-model:value="telNumber" @update:value="handleTelUpdate" />
-    </NInputGroup>
-    <NInput
-      v-if="props.type === 'Email'"
-      class="m-2"
-      v-model:value="value"
-      placeholder="请输入"
-    />
-    <NSpace justify="start" align="center" v-if="!props.disableCodeInput">
+      <NInput
+        v-if="props.type === 'Email'"
+        class="m-2"
+        v-model:value="value"
+        placeholder="请输入"
+      />
+    </template>
+    <div
+      v-if="props.type !== 'TOTP'"
+      class="relative m-2 flex w-full items-center"
+    >
+      <NInput class="flex" v-model:value="captchaCode" />
+      <div class="ml-2">
+        <img
+          @click="renewCaptcha"
+          :src="`data:image/bmp;base64,${captchaInfo?.captchaImg}`"
+          style="height: 2.5rem"
+        />
+      </div>
+    </div>
+
+    <NSpace
+      :justify="props.type === 'TOTP' ? 'center' : 'space-around'"
+      align="center"
+      v-if="!props.disableCodeInput"
+    >
       <NInputOtp
         class="m-2"
         @update-value="
@@ -89,6 +99,7 @@ const handleTelUpdate = () => {
         "
       />
       <NButton
+        v-if="props.type !== 'TOTP'"
         :disabled="countActive || isLoading"
         :loading="countActive || isLoading"
         @click="handleOnResend"

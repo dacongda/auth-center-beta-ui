@@ -15,6 +15,10 @@ export namespace AuthApi {
   export interface LoginResult {
     accessToken?: string;
     code?: string;
+    requireMfa?: boolean;
+    preferredMfa?: string;
+    avaliableMfa?: string[];
+    mfaVerifyId?: string;
   }
 
   export interface RefreshTokenResult {

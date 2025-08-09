@@ -3,16 +3,14 @@ import type { VbenFormSchema } from '@vben/common-ui';
 import type { Recordable } from '@vben/types';
 
 import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
-import { createPostFormAndSubmit } from '@vben/utils';
 
 import { NTabPane, NTabs } from 'naive-ui';
 
 import { message } from '#/adapter/naive';
-import { loginApi } from '#/api/core/auth';
 import { getCaptcha } from '#/api/core/captcha';
 import { getGroupWithApplicationApi } from '#/api/core/group';
 import {
@@ -26,6 +24,7 @@ defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
 
 const oAuthParms: any = route.query;
 const groupName: any = ref('built-in');
@@ -89,15 +88,22 @@ const authFunc = async (params: Recordable<any>) => {
     }
   }
 
-  if (oAuthParms?.response_type === 'code') {
-    await authCode(params);
+  if (oAuthParms?.response_type?.includes('code')) {
+    params.type = 'oauth';
   } else if (route.name === 'SAMLLogin') {
-    await authSaml(params);
+    params.type = 'saml';
   } else {
-    await authLogin(params);
+    params.type = 'login';
   }
 
-  authStore.loginLoading = false;
+  try {
+    const res = await authStore.authLogin(params, oAuthParms);
+    if (res.requireMfa) {
+      router.push({ name: 'MfaVerify' });
+    }
+  } catch {
+    renewCaptcha();
+  }
 };
 
 onMounted(() => {
@@ -111,6 +117,7 @@ onMounted(() => {
       if (res?.defaultApplication) {
         group.value = res.group;
         application.value = res.defaultApplication;
+        authStore.loginApplication = res.defaultApplication;
 
         captchaProvider.value = application.value?.providers.find(
           (p: any) => p.type === 'Captcha',
@@ -137,63 +144,6 @@ const preProcessLoginParam = (params: Recordable<any>) => {
   }
   params.loginMethod = loginMethod.value;
   return params;
-};
-
-const authLogin = (params: Recordable<any>) => {
-  authStore.authLogin(params).catch(() => {
-    renewCaptcha();
-  });
-};
-
-const authCode = (params: Recordable<any>) => {
-  params.type = 'oauth';
-  loginApi(params, oAuthParms)
-    .then((res: any) => {
-      authStore.loginLoading = false;
-      const params = new URLSearchParams();
-      params.set('code', res.code);
-      if (oAuthParms.nonce) {
-        params.set('nonce', oAuthParms.nonce);
-      }
-      if (oAuthParms.state) {
-        params.set('state', oAuthParms.state);
-      }
-      if (oAuthParms.response_mode === 'form_post') {
-        createPostFormAndSubmit(params, oAuthParms.redirect_uri);
-      } else if (oAuthParms.response_mode === 'fragment') {
-        window.location.href = `${oAuthParms.redirect_uri}#${params.toString()}`;
-      } else {
-        window.location.href = `${oAuthParms.redirect_uri}?${params.toString()}`;
-      }
-    })
-    .catch(() => {
-      renewCaptcha();
-    });
-};
-
-const authSaml = (params: Recordable<any>) => {
-  oAuthParms.client_id = route.params?.clientId;
-  oAuthParms.type = 'saml';
-  loginApi(params, oAuthParms)
-    .then((res: any) => {
-      authStore.loginLoading = false;
-      const params = new URLSearchParams();
-      params.set('SAMLResponse', res.samlResponse);
-      if (oAuthParms.RelayState) {
-        params.set('RelayState', oAuthParms.RelayState);
-      }
-
-      if (
-        res.samlBindingType === 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
-      ) {
-        createPostFormAndSubmit(params, res.redirectUrl);
-      } else {
-        window.location.href = `${oAuthParms.redirectUrl}?${params.toString()}`;
-      }
-    })
-    .catch(() => {
-      renewCaptcha();
-    });
 };
 
 const formSchema = computed((): VbenFormSchema[] => {
