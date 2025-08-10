@@ -1,5 +1,6 @@
 {
   "auth": {
+    "callback": "Login callback",
     "codeLogin": "Code Login",
     "codeSentTo": "Code has been sent to {0}",
     "forgetPassword": "Forget Password",

@@ -57,3 +57,17 @@ export async function removeUserApi(params: any) {
 export async function updateUserSafeInfoApi(data: any) {
   return baseRequest2Client.post('/user/updateSafeInfo', data);
 }
+
+/**
+ * 获取用户第三方绑定信息
+ */
+export async function myThirdPartBindApi() {
+  return baseRequest2Client.get('/user/myThirdPartBind');
+}
+
+/**
+ * 解绑第三方登陆
+ */
+export async function unBindThirdPartApi(data: any) {
+  return baseRequest2Client.post('/user/unBindThirdPart', data);
+}

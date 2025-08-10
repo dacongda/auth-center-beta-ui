@@ -100,7 +100,7 @@ const [BaseForm, { setValues }] = useVbenForm({
         options: [
           {
             label: 'RSA',
-            value: 'RSA',
+            value: 'RS',
           },
           {
             label: 'ECDsa',

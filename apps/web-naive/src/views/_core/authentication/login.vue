@@ -1,4 +1,6 @@
 <script lang="tsx" setup>
+import type { LocationQuery } from 'vue-router';
+
 import type { VbenFormSchema } from '@vben/common-ui';
 import type { Recordable } from '@vben/types';
 
@@ -8,7 +10,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { NTabPane, NTabs } from 'naive-ui';
+import { NButton, NFlex, NTabPane, NTabs } from 'naive-ui';
 
 import { message } from '#/adapter/naive';
 import { getCaptcha } from '#/api/core/captcha';
@@ -26,12 +28,14 @@ const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 
-const oAuthParms: any = route.query;
+const oAuthParms: LocationQuery = route.query;
 const groupName: any = ref('built-in');
 const group: any = ref();
 const application: any = ref();
 
 const captchaProvider: any = ref();
+const authProviers = ref<any[]>();
+
 const captchaInfo: any = ref();
 
 const loginMethod = ref<string>('Password');
@@ -115,12 +119,16 @@ onMounted(() => {
   })
     .then(async (res: any) => {
       if (res?.defaultApplication) {
-        group.value = res.group;
+        group.value = res;
         application.value = res.defaultApplication;
         authStore.loginApplication = res.defaultApplication;
 
         captchaProvider.value = application.value?.providers.find(
           (p: any) => p.type === 'Captcha',
+        );
+
+        authProviers.value = application.value?.providers.filter(
+          (p: any) => p.type === 'Auth',
         );
 
         renewCaptcha();
@@ -182,7 +190,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       },
       fieldName: 'code',
       label: $t('authentication.code'),
-      rules: z.string().min(1, { message: $t('authentication.code') }),
+      rules: z.string().min(1, { message: '请输入验证码' }),
       suffix: () => {
         return (
           <img
@@ -198,24 +206,76 @@ const formSchema = computed((): VbenFormSchema[] => {
 
   return loginFormSchemas;
 });
+
+const getLoginType = () => {
+  if (oAuthParms?.response_type?.includes('code')) {
+    return 'oauth';
+  } else if (route.name === 'SAMLLogin') {
+    return 'saml';
+  } else {
+    return 'login';
+  }
+};
+
+const handleLoginToThirdPart = (item: any) => {
+  if (item.subType === 'OAuth2') {
+    const state = {
+      applicationId: application.value.id,
+      applicationName: application.value.name,
+      groupName: group.value.name,
+      providerName: item.name,
+      type: getLoginType(),
+      search: Object.fromEntries(new URLSearchParams(window.location.search)),
+    };
+
+    const stateJson = JSON.stringify(state);
+    const encodedState = btoa(stateJson)
+      .replaceAll('+', '-')
+      .replaceAll('/', '_')
+      .replaceAll(/=*$/g, '');
+
+    const params = new URLSearchParams();
+    params.set('client_id', item.clientId);
+    params.set('redirect_uri', `${window.location.origin}/auth/callback`);
+    if (item.scopes) {
+      params.set('scope', item.scopes);
+    }
+    params.set('state', encodedState);
+
+    window.location.href = `${item.authEndpoint}?${params.toString()}`;
+  }
+
+  window.console.log('未实现');
+};
 </script>
 
 <template>
-  <AuthenticationLogin
-    :form-schema="formSchema"
-    :loading="authStore.loginLoading"
-    @submit="authFunc"
-  >
-    <template #title>
-      <NTabs
-        size="large"
-        v-model:value="loginMethod"
-        justify-content="space-evenly"
-        type="line"
-      >
-        <NTabPane name="Password" tab="密码登陆" />
-        <NTabPane name="Passkey" tab="Passkey" />
-      </NTabs>
-    </template>
-  </AuthenticationLogin>
+  <div>
+    <AuthenticationLogin
+      :form-schema="formSchema"
+      :loading="authStore.loginLoading"
+      @submit="authFunc"
+    >
+      <template #title>
+        <NTabs
+          size="large"
+          v-model:value="loginMethod"
+          justify-content="space-evenly"
+          type="line"
+        >
+          <NTabPane name="Password" tab="密码登陆" />
+          <NTabPane name="Passkey" tab="Passkey" />
+        </NTabs>
+      </template>
+    </AuthenticationLogin>
+
+    <NFlex class="m-3" justify="center">
+      <NButton v-for="(item, idx) in authProviers" :key="idx" size="large">
+        <img :src="item?.faviconUrl" />
+        <span class="ml-1" @click="handleLoginToThirdPart(item)">{{
+          item.displayName
+        }}</span>
+      </NButton>
+    </NFlex>
+  </div>
 </template>

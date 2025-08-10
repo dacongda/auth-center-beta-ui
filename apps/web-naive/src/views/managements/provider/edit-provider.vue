@@ -38,7 +38,7 @@ const route = useRoute();
 const id = route.params?.id;
 const curProvider = ref<any>();
 
-const providerFormValue: any = reactive({ value: {} });
+const providerFormValue: any = reactive({ value: { userInfoMap: {} } });
 const providerFormRef = ref();
 
 const valJsonStr = ref();
@@ -99,6 +99,9 @@ const testSendEmail = () => {
             <NFormItem label="提供商名">
               <NInput v-model:value="providerFormValue.value.name" />
             </NFormItem>
+            <NFormItem label="显示名称">
+              <NInput v-model:value="providerFormValue.value.displayName" />
+            </NFormItem>
             <NFormItem label="类型">
               <NSelect
                 :options="providerTypesObject"
@@ -118,6 +121,16 @@ const testSendEmail = () => {
                   )
                 "
                 v-model:value="providerFormValue.value.subType"
+              />
+            </NFormItem>
+
+            <NFormItem label="缩略图">
+              <NInput v-model:value="providerFormValue.value.faviconUrl" />
+            </NFormItem>
+            <NFormItem label="缩略图预览">
+              <img
+                style="height: 50px"
+                :src="providerFormValue.value.faviconUrl"
               />
             </NFormItem>
 
@@ -141,6 +154,93 @@ const testSendEmail = () => {
                 :label="field.label"
               >
                 <NInput v-model:value="providerFormValue.value.configureUrl" />
+              </NFormItem>
+
+              <NFormItem
+                v-if="field.name === 'authEndpoint'"
+                :label="field.label"
+              >
+                <NInput v-model:value="providerFormValue.value.authEndpoint" />
+              </NFormItem>
+
+              <NFormItem
+                v-if="field.name === 'tokenEndpoint'"
+                :label="field.label"
+              >
+                <NInput v-model:value="providerFormValue.value.tokenEndpoint" />
+              </NFormItem>
+
+              <NFormItem
+                v-if="field.name === 'userInfoEndpoint'"
+                :label="field.label"
+              >
+                <NInput
+                  v-model:value="providerFormValue.value.userInfoEndpoint"
+                />
+              </NFormItem>
+
+              <NFormItem v-if="field.name === 'scopes'" :label="field.label">
+                <NInput v-model:value="providerFormValue.value.scopes" />
+              </NFormItem>
+
+              <NFormItem
+                v-if="field.name === 'userInfoMap'"
+                :label="field.label"
+              >
+                <NSpace vertical class="w-full">
+                  <NFormItem
+                    size="small"
+                    label="Id"
+                    label-placement="top"
+                    :show-feedback="false"
+                  >
+                    <NInput
+                      v-model:value="providerFormValue.value.userInfoMap.id"
+                    />
+                  </NFormItem>
+                  <NFormItem
+                    size="small"
+                    label="Name"
+                    label-placement="top"
+                    :show-feedback="false"
+                  >
+                    <NInput
+                      v-model:value="providerFormValue.value.userInfoMap.name"
+                    />
+                  </NFormItem>
+                  <NFormItem
+                    size="small"
+                    label="PreferredName"
+                    label-placement="top"
+                    :show-feedback="false"
+                  >
+                    <NInput
+                      v-model:value="
+                        providerFormValue.value.userInfoMap.preferredName
+                      "
+                    />
+                  </NFormItem>
+                  <NFormItem
+                    size="small"
+                    label="Email"
+                    label-placement="top"
+                    :show-feedback="false"
+                  >
+                    <NInput
+                      v-model:value="providerFormValue.value.userInfoMap.email"
+                    />
+                  </NFormItem>
+                  <NFormItem
+                    size="small"
+                    label="Phone"
+                    label-placement="top"
+                    :show-feedback="false"
+                  >
+                    <NInput
+                      v-model:value="providerFormValue.value.userInfoMap.phone"
+                    />
+                  </NFormItem>
+                </NSpace>
               </NFormItem>
 
               <NFormItem v-if="field.name === 'port'" :label="field.label">

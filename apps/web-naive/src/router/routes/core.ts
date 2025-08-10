@@ -73,6 +73,15 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'Callback',
+        path: 'callback',
+        component: () =>
+          import('#/views/_core/authentication/auth-callback.vue'),
+        meta: {
+          title: $t('page.auth.callback'),
+        },
+      },
+      {
         name: 'ForgetPassword',
         path: 'forget-password',
         component: () =>

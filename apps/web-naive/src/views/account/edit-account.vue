@@ -20,8 +20,9 @@ import { getMyInfoApi } from '#/api';
 import { getGroupTreeApi } from '#/api/core/group';
 
 import { getFlatGroupTree, getRolesByParentChain } from '../utils';
-import EditBasicInfo from './edit-basic-info.vue';
-import EditSafeInfo from './edit-safe-info.vue';
+import EditBasicInfo from './account-board/edit-basic-info.vue';
+import EditSafeInfo from './account-board/edit-safe-info.vue';
+import EditThirdPartInfo from './account-board/edit-third-part-info.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -41,7 +42,13 @@ const menuOptions: MenuOption[] = [
     label: '密码与安全',
     key: 'SafeInfo',
   },
+  {
+    label: '第三方登陆',
+    key: 'ThirdPartInfo',
+  },
 ];
+
+const groupName = ref('');
 
 const windowWidth = ref(window.innerWidth);
 const handleResize = () => {
@@ -68,6 +75,9 @@ onMounted(async () => {
       (el: any) => el.id === myInfo.value.groupId,
     );
 
+    groupName.value = group.name;
+    myInfo.value.groupName = group.name;
+
     userInheritRoles.value = getRolesByParentChain(
       groupFlat.value,
       group?.parentChain,
@@ -88,6 +98,7 @@ const handleUpdateMenu = (key: string) => {
 const updateUserInfo = async () => {
   await getMyInfoApi().then((res) => {
     myInfo.value = res;
+    myInfo.value.groupName = groupName.value;
   });
 };
 
@@ -137,6 +148,11 @@ const diaplaySidebar = computed(() => {
             <EditSafeInfo
               v-model:user-info="myInfo"
               v-if="menuKey === 'SafeInfo'"
+              @update-user-info="updateUserInfo"
+            />
+            <EditThirdPartInfo
+              v-model:user-info="myInfo"
+              v-if="menuKey === 'ThirdPartInfo'"
               @update-user-info="updateUserInfo"
             />
           </NLayoutContent>

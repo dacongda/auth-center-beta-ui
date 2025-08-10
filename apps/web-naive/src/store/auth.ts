@@ -76,7 +76,11 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       loginLoading.value = true;
 
-      const res = await loginApi(params, {});
+      const res = await loginApi(params, oAuthParms);
+      if (params.type === 'bind') {
+        router.push('/account/EditAccount/ThirdPartInfo');
+        return;
+      }
 
       const { accessToken, requireMfa } = res;
 

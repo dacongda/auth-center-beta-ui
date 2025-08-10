@@ -75,4 +75,10 @@ export const providerRule: any = {
   Email: {
     SMTP: [{ label: '默认', value: 'Default' }],
   },
+  Auth: {
+    OAuth2: [
+      { label: '登陆', value: 'Login' },
+      { label: '注册', value: 'Register' },
+    ],
+  },
 };

@@ -9,10 +9,8 @@ export const gridOptions: VxeGridProps = {
   },
   columns: [
     { title: '序号', type: 'seq', width: 50 },
-    // { align: 'left', title: 'Name', type: 'checkbox', width: 100 },
     { field: 'id', sortable: false, title: 'Id', width: 80 },
     { field: 'name', sortable: false, title: 'Name' },
-    // { field: 'defaultRoles', sortable: false, title: 'DefaultRoles' },
     { field: 'type', sortable: false, title: 'Type' },
     { field: 'subType', sortable: false, title: 'Sub Type' },
     {
@@ -69,7 +67,7 @@ export const goEditProvider = (router: any, row: any) => {
 export const providerTypes: any = {
   Captcha: ['Default', 'Aliyun'],
   Email: ['SMTP'],
-  Auth: ['OIDC', 'SAML'],
+  Auth: ['OAuth2', 'OIDC', 'SAML'],
 };
 
 export const providerTypesObject = Object.keys(providerTypes).map((el) => {
@@ -90,6 +88,15 @@ export const providerFieldArray: any = {
       { name: 'clientId', label: 'accessKeyId' },
       { name: 'clientSecret', label: 'accessKeySecret' },
       { name: 'configureUrl', label: 'OIDC Discovery' },
+    ],
+    OAuth2: [
+      { name: 'clientId', label: 'accessKeyId' },
+      { name: 'clientSecret', label: 'accessKeySecret' },
+      { name: 'authEndpoint', label: '登陆端点' },
+      { name: 'tokenEndpoint', label: 'Token端点' },
+      { name: 'userInfoEndpoint', label: '用户信息端点' },
+      { name: 'scopes', label: 'Scopes' },
+      { name: 'userInfoMap', label: '用户映射' },
     ],
   },
   Email: {
