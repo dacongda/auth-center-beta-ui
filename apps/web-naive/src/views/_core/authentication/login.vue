@@ -285,7 +285,7 @@ const handleLoginToThirdPart = (item: any) => {
         @click="handleLoginToThirdPart(item)"
         size="large"
       >
-        <img :src="item?.faviconUrl" />
+        <img :src="item?.faviconUrl" style="height: 1.5rem" />
         <span class="ml-1">{{ item.displayName }}</span>
       </NButton>
     </NFlex>
