@@ -17,7 +17,7 @@ const countryRegionOption = countryRegionList.map((el) => {
 const telCountryCode = ref('+86');
 const telNumber = ref('');
 const handleTelUpdate = () => {
-  value.value = `${telCountryCode.value} ${telNumber.value}`;
+  value.value = `${telCountryCode.value}${telNumber.value}`;
 };
 </script>
 <template>

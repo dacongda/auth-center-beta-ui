@@ -65,20 +65,32 @@ export const goEditApplication = (router: any, row: any) => {
 
 export const providerRule: any = {
   Captcha: {
-    Default: [
-      { label: '计算题', value: 'Calculate' },
-      { label: '数字', value: 'Number' },
-      { label: '字母', value: 'Alphabet' },
-      { label: '字母与数字', value: 'Letter' },
-    ],
+    Default: {
+      options: [
+        { label: '计算题', value: 'Calculate' },
+        { label: '数字', value: 'Number' },
+        { label: '字母', value: 'Alphabet' },
+        { label: '字母与数字', value: 'Letter' },
+      ],
+      multiple: false,
+    },
   },
   Email: {
-    SMTP: [{ label: '默认', value: 'Default' }],
+    SMTP: {
+      options: [
+        { label: '默认', value: 'Default' },
+        { label: '注册', value: 'Register' },
+      ],
+      multiple: true,
+    },
   },
   Auth: {
-    OAuth2: [
-      { label: '登陆', value: 'Login' },
-      { label: '注册', value: 'Register' },
-    ],
+    OAuth2: {
+      options: [
+        { label: '登陆', value: 'Login' },
+        { label: '注册', value: 'Register' },
+      ],
+      multiple: true,
+    },
   },
 };

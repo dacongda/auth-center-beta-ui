@@ -13,4 +13,7 @@ export const overridesPreferences = defineOverridesPreferences({
   tabbar: {
     enable: false,
   },
+  transition: {
+    name: 'fade',
+  },
 });

@@ -23,6 +23,7 @@ import { getFlatGroupTree, getRolesByParentChain } from '../utils';
 import EditBasicInfo from './account-board/edit-basic-info.vue';
 import EditSafeInfo from './account-board/edit-safe-info.vue';
 import EditThirdPartInfo from './account-board/edit-third-part-info.vue';
+import SessionManagement from './account-board/session-management.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -45,6 +46,10 @@ const menuOptions: MenuOption[] = [
   {
     label: '第三方登陆',
     key: 'ThirdPartInfo',
+  },
+  {
+    label: '会话管理',
+    key: 'SessionManagement',
   },
 ];
 
@@ -153,6 +158,11 @@ const diaplaySidebar = computed(() => {
             <EditThirdPartInfo
               v-model:user-info="myInfo"
               v-if="menuKey === 'ThirdPartInfo'"
+              @update-user-info="updateUserInfo"
+            />
+            <SessionManagement
+              v-if="menuKey === 'SessionManagement'"
+              v-model:user-info="myInfo"
               @update-user-info="updateUserInfo"
             />
           </NLayoutContent>

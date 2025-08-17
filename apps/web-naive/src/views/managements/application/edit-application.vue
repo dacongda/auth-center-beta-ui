@@ -24,7 +24,9 @@ import {
   NPopconfirm,
   NSelect,
   NSpace,
+  NSwitch,
   NTag,
+  NTreeSelect,
 } from 'naive-ui';
 
 import { message } from '#/adapter/naive';
@@ -34,6 +36,7 @@ import {
   updateApplicationApi,
 } from '#/api/core/application';
 import { getCertsApi } from '#/api/core/cert';
+import { getGroupTreeApi } from '#/api/core/group';
 import { getProvidersApi } from '#/api/core/provider';
 
 import { providerRule } from './application-data';
@@ -44,6 +47,10 @@ const id = route.params?.id;
 
 const certList = ref<any>([]);
 const providerList = ref<any>([]);
+const groupTree = ref<any>([]);
+
+const samlLinkGroupId = ref<any>(null);
+
 const appFormValue: any = reactive({
   value: {
     id: null,
@@ -71,6 +78,15 @@ onMounted(async () => {
     appFormValue.value.clientId = crypto.randomUUID().replaceAll('-', '');
     appFormValue.value.clientSecret = crypto.randomUUID().replaceAll('-', '');
   }
+
+  getGroupTreeApi().then((res) => {
+    groupTree.value = res.map((el: any) => {
+      return {
+        name: el.name,
+        id: el.id,
+      };
+    });
+  });
 
   getProvidersApi({}).then((res: any) => {
     providerList.value = res;
@@ -104,7 +120,10 @@ const handelCopy = (field: string) => {
     const val = `${window.location.origin}/.well-known/openid-configuration`;
     navigator.clipboard.writeText(val);
   } else if (field === 'saml link') {
-    const val = `${window.location.origin}/api/saml/metadata/${appFormValue.value.clientId}`;
+    let val = `${window.location.origin}/api/saml/metadata/${appFormValue.value.clientId}`;
+    if (samlLinkGroupId.value) {
+      val += `-${samlLinkGroupId.value}`;
+    }
     navigator.clipboard.writeText(val);
   } else {
     navigator.clipboard.writeText(appFormValue.value[field] || '');
@@ -126,15 +145,27 @@ const renderCertLabel = (option: SelectOption, _: boolean) => {
 };
 
 const handleProvierItemUpdate = (value: any, index: number) => {
-  window.console.log(value, index);
+  if (
+    providerListOptions.value.some(
+      (el: any) => el.value === value && el.disabled,
+    )
+  ) {
+    return;
+  }
+  // window.console.log(value, index);
   const provider = providerList.value?.find((el: any) => el.id === value);
-  window.console.log(provider);
+  // window.console.log(provider);
   appFormValue.value.providerItems[index].type = provider?.type;
   appFormValue.value.providerItems[index].providerId = value;
 };
 
 const downloadLink = () => {
-  fetch(samlLink.value)
+  let val = `${window.location.origin}/api/saml/metadata/${appFormValue.value.clientId}`;
+  if (samlLinkGroupId.value) {
+    val += `-${samlLinkGroupId.value}`;
+  }
+  window.console.log(val);
+  fetch(val)
     .then((response) => response.blob())
     .then((blob) => {
       const url = window.URL.createObjectURL(blob);
@@ -155,7 +186,7 @@ const samlLink = computed(() => {
 
 const oidcLink = `${window.location.origin}/.well-known/openid-configuration`;
 
-const getProviderRule = (id: any) => {
+const getProviderRules = (id: any) => {
   const provider = providerList.value.find((el: any) => el.id === id);
 
   if (!providerRule[provider?.type]) {
@@ -167,6 +198,29 @@ const getProviderRule = (id: any) => {
 
   return providerRule[provider.type][provider.subType];
 };
+
+const providerListOptions = computed(() => {
+  return providerList.value.map((el: any) => {
+    return {
+      label: el.name,
+      value: el.id,
+      type: el.type,
+      disabled: appFormValue.value.providerItems.find(
+        (pitem: any) => el.id === pitem.providerId,
+      ),
+    };
+  });
+});
+
+const accessGroupOptions = computed(() => {
+  return groupTree.value.map((el: any) => {
+    const name = groupTree.value.find((g: any) => g.id === el.id)?.name;
+    return {
+      label: name,
+      value: name,
+    };
+  });
+});
 </script>
 <template>
   <Page :title="route.name === 'AddApplication' ? '新增应用' : '编辑应用'">
@@ -179,6 +233,17 @@ const getProviderRule = (id: any) => {
           <NForm ref="appFormRef" label-placement="left" label-width="150">
             <NFormItem label="应用名">
               <NInput v-model:value="appFormValue.value.name" />
+            </NFormItem>
+            <NFormItem label="可用群组">
+              <NTreeSelect
+                :options="groupTree"
+                multiple
+                key-field="id"
+                label-field="name"
+                children-field="children"
+                default-expand-all
+                v-model:value="appFormValue.value.groupIds"
+              />
             </NFormItem>
             <NFormItem label="Client ID">
               <NInputGroup>
@@ -213,6 +278,9 @@ const getProviderRule = (id: any) => {
             </NFormItem>
             <NFormItem label="重定向地址">
               <NDynamicInput v-model:value="appFormValue.value.redirectUrls" />
+            </NFormItem>
+            <NFormItem label="SAML受众">
+              <NDynamicInput v-model:value="appFormValue.value.samlAudiences" />
             </NFormItem>
             <NFormItem label="Scopes">
               <NSelect
@@ -250,6 +318,29 @@ const getProviderRule = (id: any) => {
                 <template #suffix> 小时 </template>
               </NInputNumber>
             </NFormItem>
+            <NFormItem label="Access过期时间">
+              <NInputNumber
+                :format="(value: null | number) => {
+                  return ((value ?? 0) / 60).toString();
+                }"
+                :parse="(value: string) => {
+                  return Number.parseInt(value) * 60;
+                }"
+                v-model:value="appFormValue.value.accessExpiredSecond"
+                :default-value="2 * 60"
+                :step="60"
+              >
+                <template #suffix> 分钟 </template>
+              </NInputNumber>
+            </NFormItem>
+            <NFormItem label="SAML响应压缩">
+              <NSwitch
+                v-model:checked="appFormValue.value.samlResponseCompress"
+              />
+            </NFormItem>
+            <NFormItem label="SAML数据加密">
+              <NSwitch v-model:checked="appFormValue.value.samlEncrypt" />
+            </NFormItem>
             <NFormItem label="Scopes">
               <NSelect
                 :options="certList"
@@ -270,11 +361,17 @@ const getProviderRule = (id: any) => {
             </NFormItem>
             <NFormItem label="SAML元数据">
               <NInputGroup>
-                <NInput readonly :value="samlLink" />
+                <NInput readonly :value="`${samlLink}-${samlLinkGroupId}`" />
+                <NSelect
+                  style="width: 200px"
+                  :options="accessGroupOptions"
+                  placeholder="请选择"
+                  v-model:value="samlLinkGroupId"
+                />
                 <NButton @click="handelCopy('saml link')">
                   <MaterialSymbolsContentCopy />
                 </NButton>
-                <NButton @on-click="downloadLink">
+                <NButton @click="downloadLink">
                   <MaterialSymbolsDownload />
                 </NButton>
               </NInputGroup>
@@ -290,9 +387,7 @@ const getProviderRule = (id: any) => {
               >
                 <template #default="{ value, index }">
                   <NSelect
-                    :options="providerList.map((el: any) => {
-                  return { label: el.name, value: el.id, type: el.type };
-                })"
+                    :options="providerListOptions"
                     placeholder="请选择提供商"
                     v-model:value="value.providerId"
                     :on-update:value="
@@ -305,10 +400,18 @@ const getProviderRule = (id: any) => {
                     v-model:value="value.type"
                   />
                   <NSelect
-                    multiple
-                    :options="getProviderRule(value.providerId)"
+                    :multiple="getProviderRules(value.providerId).multiple"
+                    :options="getProviderRules(value.providerId).options"
                     placeholder="请选择规则"
-                    v-model:value="value.rule"
+                    :value="
+                      getProviderRules(value.providerId).multiple
+                        ? value.rule
+                        : value.rule[0]
+                    "
+                    @update:value="
+                      (val: any) => {
+                        value.rule = getProviderRules(value.providerId).multiple ? val : [val];
+                      }"
                   />
                 </template>
               </NDynamicInput>

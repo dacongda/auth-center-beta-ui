@@ -1,5 +1,13 @@
 <script setup lang="tsx">
-import { NButton, NForm, NFormItem, NInput, NSpace, NTag } from 'naive-ui';
+import {
+  NButton,
+  NForm,
+  NFormItem,
+  NInput,
+  NSpace,
+  NSwitch,
+  NTag,
+} from 'naive-ui';
 
 defineOptions({ name: 'EditBasicInfo' });
 
@@ -10,8 +18,9 @@ interface UserBasicInfo {
   phone?: string;
   roles?: Array<string>;
   groupId?: number;
-  number?: string;
+  id?: string;
   name?: string;
+  isAdmin?: boolean;
 }
 
 const userinfo = defineModel<UserBasicInfo>('userInfo', { default: {} });
@@ -19,10 +28,13 @@ const userinfo = defineModel<UserBasicInfo>('userInfo', { default: {} });
 <template>
   <NForm class="m-6" label-placement="left" label-width="90">
     <NFormItem label="ID">
-      <NInput v-model:value="userinfo.number" />
+      <NInput disabled v-model:value="userinfo.id" />
     </NFormItem>
     <NFormItem label="姓名">
       <NInput v-model:value="userinfo.name" />
+    </NFormItem>
+    <NFormItem label="管理员">
+      <NSwitch disabled v-model:value="userinfo.isAdmin" />
     </NFormItem>
     <NFormItem label="归属群组">
       {{ props.groups?.find((el: any) => el.id === userinfo?.groupId).name }}

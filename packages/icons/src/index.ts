@@ -19,3 +19,7 @@ export const MaterialSymbolsDownload = createIconifyIcon(
 export const MaterialSymbolsPasskey = createIconifyIcon(
   'material-symbols:passkey',
 );
+
+export const MaterialSymbolsDesktopWindowsWutline = createIconifyIcon(
+  'material-symbols:desktop-windows-outline',
+);

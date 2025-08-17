@@ -8,6 +8,15 @@ export async function getApplicationsApi(params: any) {
 }
 
 /**
+ * 根据群组获取从属应用
+ */
+export async function getApplicationsByGroupIdApi(groupId: any) {
+  return baseRequest2Client.get('/application/getApplicationsByGroupId', {
+    params: { groupId },
+  });
+}
+
+/**
  * 获取应用
  */
 export async function getApplicationApi(params: any) {

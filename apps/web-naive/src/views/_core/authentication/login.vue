@@ -46,7 +46,7 @@ const authFunc = async (params: Recordable<any>) => {
   authStore.loginLoading = true;
   if (loginMethod.value === 'Passkey') {
     const { options, optionId } = await getAssertionOptionsApi({
-      number: params.username,
+      id: params.username,
     });
 
     options.challenge = coerceToArrayBuffer(options.challenge, 'challenge');
@@ -120,6 +120,7 @@ onMounted(() => {
     .then(async (res: any) => {
       if (res?.defaultApplication) {
         group.value = res;
+        groupName.value = group.value.name;
         application.value = res.defaultApplication;
         authStore.loginApplication = res.defaultApplication;
 
@@ -140,6 +141,9 @@ onMounted(() => {
 });
 
 const renewCaptcha = async () => {
+  if (!captchaProvider.value) {
+    return;
+  }
   captchaInfo.value = await getCaptcha({
     applicationId: application.value.id,
   });
@@ -168,25 +172,29 @@ const formSchema = computed((): VbenFormSchema[] => {
           ? z.string().min(1, { message: $t('authentication.usernameTip') })
           : undefined,
     },
-  ];
-
-  if (loginMethod.value === 'Password') {
-    loginFormSchemas.push({
+    {
       component: 'VbenInputPassword',
       componentProps: {
         placeholder: $t('authentication.password'),
       },
+      dependencies: {
+        triggerFields: ['loginMethod'],
+        show: loginMethod.value === 'Password',
+      },
       fieldName: 'password',
       label: $t('authentication.password'),
       rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
-    });
-  }
-
-  if (captchaProvider.value) {
-    const captchaSchema: VbenFormSchema = {
+    },
+    {
       component: 'VbenInput',
       componentProps: {
         placeholder: $t('authentication.code'),
+      },
+      dependencies: {
+        triggerFields: [''],
+        show: () => {
+          return !!captchaProvider.value;
+        },
       },
       fieldName: 'code',
       label: $t('authentication.code'),
@@ -200,9 +208,8 @@ const formSchema = computed((): VbenFormSchema[] => {
           />
         );
       },
-    };
-    loginFormSchemas.push(captchaSchema);
-  }
+    },
+  ];
 
   return loginFormSchemas;
 });
@@ -270,11 +277,14 @@ const handleLoginToThirdPart = (item: any) => {
     </AuthenticationLogin>
 
     <NFlex class="m-3" justify="center">
-      <NButton v-for="(item, idx) in authProviers" :key="idx" size="large">
+      <NButton
+        v-for="(item, idx) in authProviers"
+        :key="idx"
+        @click="handleLoginToThirdPart(item)"
+        size="large"
+      >
         <img :src="item?.faviconUrl" />
-        <span class="ml-1" @click="handleLoginToThirdPart(item)">{{
-          item.displayName
-        }}</span>
+        <span class="ml-1">{{ item.displayName }}</span>
       </NButton>
     </NFlex>
   </div>

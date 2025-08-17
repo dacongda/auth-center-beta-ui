@@ -6,10 +6,18 @@ import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
 
-import { NButton, NDropdown, NSpace, NSplit, NTree } from 'naive-ui';
+import {
+  NButton,
+  NDropdown,
+  NPopconfirm,
+  NSpace,
+  NSplit,
+  NTree,
+} from 'naive-ui';
 
+import { message } from '#/adapter/naive';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { getUserListApi } from '#/api';
+import { getUserListApi, removeUserApi } from '#/api';
 import { getGroupTreeApi } from '#/api/core/group';
 
 import { goAddGroup } from './group-data';
@@ -118,7 +126,21 @@ const nodeProps = ({ option }: { option: TreeOption }) => {
               <NButton text type="primary" @click="goEditUser(router, row)">
                 编辑
               </NButton>
-              <NButton text type="error">删除</NButton>
+              <NPopconfirm
+                @positive-click="
+                  () => {
+                    removeUserApi({ id: row.id }).then(() => {
+                      message.success('成功');
+                      gridApi.reload();
+                    });
+                  }
+                "
+              >
+                <template #trigger>
+                  <NButton text type="error"> 删除 </NButton>
+                </template>
+                是否删除用户 {{ row.name }}
+              </NPopconfirm>
             </NSpace>
           </template>
           <template #toolbar-actions>
@@ -137,6 +159,10 @@ const nodeProps = ({ option }: { option: TreeOption }) => {
             <NButton type="primary" @click="() => gridApi.reload()">
               刷新并返回第一页
             </NButton>
+          </template>
+
+          <template #isAdmin="{ row }">
+            <span>{{ row.isAdmin ? '管理员' : '普通用户' }}</span>
           </template>
         </Grid>
       </template>

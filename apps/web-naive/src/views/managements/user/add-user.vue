@@ -48,6 +48,7 @@ const onSubmit = (value: any) => {
     updateUserApi(value).then(() => message.success('成功'));
   } else {
     addUserApi(value).then(() => message.success('成功'));
+    router.go(-1);
   }
 };
 
@@ -74,7 +75,7 @@ const [BaseForm, { setValues }] = useVbenForm({
       componentProps: {
         placeholder: '请输入编号',
       },
-      fieldName: 'number',
+      fieldName: 'id',
       label: '编号',
     },
     {
@@ -117,6 +118,14 @@ const [BaseForm, { setValues }] = useVbenForm({
       },
       fieldName: 'phone',
       label: '手机号',
+    },
+    {
+      component: 'Switch',
+      fieldName: 'isAdmin',
+      label: '管理员',
+      componentProps: {
+        style: { width: 'auto' },
+      },
     },
     {
       component: 'Select',

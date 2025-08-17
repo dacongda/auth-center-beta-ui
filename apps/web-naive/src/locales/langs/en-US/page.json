@@ -1,14 +1,21 @@
 {
+  "auditing-logging": {
+    "title": "Auditing & Logging"
+  },
   "auth": {
-    "login": "Login",
-    "register": "Register",
+    "callback": "Login callback",
     "codeLogin": "Code Login",
+    "codeSentTo": "Code has been sent to {0}",
+    "forgetPassword": "Forget Password",
+    "login": "Login",
     "qrcodeLogin": "Qr Code Login",
-    "forgetPassword": "Forget Password"
+    "register": "Register",
+    "sendingCode": "SMS Code is sending..."
   },
   "dashboard": {
-    "title": "Dashboard",
     "analytics": "Analytics",
+    "title": "Dashboard",
     "workspace": "Workspace"
-  }
+  },
+  "mfa_verify": "Mfa verify"
 }

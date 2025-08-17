@@ -38,6 +38,18 @@ export async function addUserApi(data: any) {
 }
 
 /**
+ * Excel导入用户
+ */
+export async function importUserApi(groupId: any, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('groupId', groupId);
+  return baseRequest2Client.post('/user/importUser', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+/**
  * 更新用户
  */
 export async function updateUserApi(data: any) {

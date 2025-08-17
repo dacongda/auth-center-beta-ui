@@ -170,6 +170,10 @@ const testSendEmail = () => {
                 <NInput v-model:value="providerFormValue.value.tokenEndpoint" />
               </NFormItem>
 
+              <NFormItem v-if="field.name === 'tokenType'" :label="field.label">
+                <NInput v-model:value="providerFormValue.value.tokenType" />
+              </NFormItem>
+
               <NFormItem
                 v-if="field.name === 'userInfoEndpoint'"
                 :label="field.label"

@@ -9,12 +9,17 @@ export const getGridOptions = (userApi: any): VxeGridProps => {
     columns: [
       // { title: '序号', type: 'seq', width: 50 },
       // { align: 'left', title: 'Name', type: 'checkbox', width: 100 },
-      { field: 'id', sortable: false, title: 'Id', width: 50 },
-      { field: 'number', sortable: false, title: 'Number' },
+      { field: 'id', sortable: false, title: 'Id' },
       { field: 'name', sortable: false, title: 'Name' },
       { field: 'email', sortable: false, title: 'Email' },
       { field: 'phone', sortable: false, title: 'Phone' },
       { field: 'groupName', sortable: false, title: 'Group' },
+      {
+        field: 'isAdmin',
+        slots: { default: 'isAdmin' },
+        sortable: false,
+        title: '用户类型',
+      },
       {
         field: 'action',
         fixed: 'right',

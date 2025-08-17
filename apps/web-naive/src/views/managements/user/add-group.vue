@@ -8,6 +8,7 @@ import { NButton, NCard, NGrid, NGridItem } from 'naive-ui';
 
 import { useVbenForm } from '#/adapter/form';
 import { message } from '#/adapter/naive';
+import { getApplicationsByGroupIdApi } from '#/api/core/application';
 import {
   addGroupApi,
   getGroupApi,
@@ -22,6 +23,8 @@ const parentId = history.state.parentId;
 const id = route.params?.id;
 const curGroup = ref<any>();
 
+const applicationList = ref<any>([]);
+
 const onSubmit = (value: any) => {
   if (id) {
     value.id = id;
@@ -32,8 +35,12 @@ const onSubmit = (value: any) => {
 };
 
 const groupTree = ref<any>([]);
-onMounted(() => {
+onMounted(async () => {
   if (id) {
+    await getApplicationsByGroupIdApi(id).then((res) => {
+      applicationList.value = res;
+      window.console.log(curGroup.value);
+    });
     getGroupApi({ id }).then((res) => {
       curGroup.value = res;
       setValues(curGroup.value);
@@ -75,6 +82,18 @@ const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
       },
       fieldName: 'displayName',
       label: '显示名',
+    },
+    {
+      component: 'Select',
+      componentProps: {
+        valueField: 'id',
+        labelField: 'name',
+        options: applicationList,
+        placeholder: '请选择',
+        showSearch: true,
+      },
+      fieldName: 'defaultApplicationId',
+      label: '默认应用',
     },
     {
       component: 'Select',

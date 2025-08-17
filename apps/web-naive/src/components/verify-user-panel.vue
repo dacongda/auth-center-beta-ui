@@ -23,7 +23,7 @@ const user = useUserStore();
 const onVerifyUser = async () => {
   if (authMode.value === 'Passkey') {
     const { options, optionId } = await getAssertionOptionsApi({
-      number: user.userInfo?.userId,
+      id: user.userInfo?.userId,
     });
 
     options.challenge = coerceToArrayBuffer(options.challenge, 'challenge');

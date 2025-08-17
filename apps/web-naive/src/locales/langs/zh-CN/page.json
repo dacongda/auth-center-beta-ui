@@ -1,4 +1,13 @@
 {
+  "auditing-logging": {
+    "logging": {
+      "title": "日记列表"
+    },
+    "title": "审计与日记",
+    "user-session": {
+      "title": "用户Session"
+    }
+  },
   "auth": {
     "callback": "登录回调",
     "codeLogin": "验证码登录",

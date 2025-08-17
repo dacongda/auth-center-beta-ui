@@ -49,7 +49,7 @@ export async function refreshTokenApi() {
  * 退出登录
  */
 export async function logoutApi() {
-  return baseRequestClient.post('/auth/logout', {
+  return baseRequest2Client.post('/auth/logout', {
     withCredentials: true,
   });
 }
@@ -73,4 +73,11 @@ export async function verifyUser(data: AuthApi.LoginParams) {
  */
 export async function sendVerificationCodeApi(data: any) {
   return baseRequest2Client.post('/auth/sendVerificationCode', data);
+}
+
+/**
+ * 撤销令牌
+ */
+export async function revokeTokenApi(data: any) {
+  return baseRequest2Client.post('/auth/revokeToken', data);
 }
