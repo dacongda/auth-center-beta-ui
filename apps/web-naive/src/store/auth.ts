@@ -6,7 +6,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { LOGIN_PATH } from '@vben/constants';
-import { preferences } from '@vben/preferences';
+import { preferences, updatePreferences } from '@vben/preferences';
 import { resetAllStores, useAccessStore, useUserStore } from '@vben/stores';
 import { createPostFormAndSubmit } from '@vben/utils';
 
@@ -125,6 +125,20 @@ export const useAuthStore = defineStore('auth', () => {
             : await router.push(
                 userInfo.homePath || preferences.app.defaultHomePath,
               );
+        }
+
+        if (userInfo?.roles?.includes('user')) {
+          updatePreferences({
+            app: {
+              layout: 'header-nav',
+            },
+          });
+        } else {
+          updatePreferences({
+            app: {
+              layout: 'sidebar-nav',
+            },
+          });
         }
 
         if (userInfo?.realName) {

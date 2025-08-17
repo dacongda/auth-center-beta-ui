@@ -45,7 +45,8 @@ onMounted(async () => {
         router.push({ name: 'MfaVerify' });
       }
     } catch (error: any) {
-      failMessage.value = error;
+      console.error(error);
+      failMessage.value = error.message;
       fail.value = true;
     }
   } else if (searchParams.get('SAMLResponse')) {

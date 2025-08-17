@@ -54,6 +54,8 @@
   "thirdPartyLogin": "其他登录方式",
   "username": "账号",
   "usernameTip": "请输入用户名",
+  "nickname": "昵称",
+  "nicknameTip": "请输入昵称",
   "verifyRequiredTip": "请先完成验证",
   "welcomeBack": "欢迎回来"
 }

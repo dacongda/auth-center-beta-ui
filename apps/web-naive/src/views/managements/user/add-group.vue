@@ -96,6 +96,14 @@ const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
       label: '默认应用',
     },
     {
+      component: 'Switch',
+      fieldName: 'disableSignup',
+      componentProps: {
+        style: { width: 'auto' },
+      },
+      label: '禁止注册',
+    },
+    {
       component: 'Select',
       componentProps: {
         allowClear: true,

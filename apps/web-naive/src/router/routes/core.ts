@@ -57,6 +57,14 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'LoginGroup',
+        path: 'login/:groupName',
+        component: () => import('#/views/_core/authentication/login.vue'),
+        meta: {
+          title: $t('page.auth.login'),
+        },
+      },
+      {
         name: 'MfaVerify',
         path: 'mfaVerify',
         component: () => import('#/views/_core/authentication/mfa-verify.vue'),
@@ -93,6 +101,14 @@ const coreRoutes: RouteRecordRaw[] = [
       {
         name: 'Register',
         path: 'register',
+        component: () => import('#/views/_core/authentication/register.vue'),
+        meta: {
+          title: $t('page.auth.register'),
+        },
+      },
+      {
+        name: 'RegisterGroup',
+        path: 'register/:groupName',
         component: () => import('#/views/_core/authentication/register.vue'),
         meta: {
           title: $t('page.auth.register'),

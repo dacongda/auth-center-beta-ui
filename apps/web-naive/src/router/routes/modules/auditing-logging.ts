@@ -9,6 +9,7 @@ const routes: RouteRecordRaw[] = [
       keepAlive: true,
       order: 2000,
       title: $t('page.auditing-logging.title'),
+      authority: ['admin'],
     },
     name: 'AuditingLogging',
     path: '/auditing-logging',

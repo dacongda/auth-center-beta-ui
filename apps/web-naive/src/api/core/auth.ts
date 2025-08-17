@@ -37,6 +37,15 @@ export async function loginApi(data: AuthApi.LoginParams, query = {}) {
 }
 
 /**
+ * 注册
+ */
+export async function registerApi(data: AuthApi.LoginParams, query = {}) {
+  return baseRequest2Client.post<AuthApi.LoginResult>('/auth/register', data, {
+    params: query,
+  });
+}
+
+/**
  * 刷新accessToken
  */
 export async function refreshTokenApi() {

@@ -9,6 +9,7 @@ const routes: RouteRecordRaw[] = [
       keepAlive: true,
       order: 1000,
       title: $t('managements.auth-safe'),
+      authority: ['admin'],
     },
     name: 'AuthSafe',
     path: '/auth-safe',

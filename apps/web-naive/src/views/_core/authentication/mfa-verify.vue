@@ -33,6 +33,9 @@ const handleVerify = () => {
 
 const captchaInfo: any = ref();
 const renewCaptcha = async () => {
+  if (curType.value === 'TOTP') {
+    return;
+  }
   captchaInfo.value = await getCaptcha({
     applicationId: authStore.loginApplication.id,
   });
@@ -72,7 +75,11 @@ const handleResend = async (captchaInfo: any, captchaCode: any) => {
       :key="idx"
     >
       <li v-if="curType !== item">
-        <NButton type="primary" text @click="curType = item">
+        <NButton
+          type="primary"
+          text
+          @click="((curType = item), renewCaptcha())"
+        >
           使用{{ item }}
         </NButton>
       </li>

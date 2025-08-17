@@ -66,7 +66,12 @@ const NUpload = defineAsyncComponent(() =>
 const NDynamicInput = defineAsyncComponent(() =>
   import('naive-ui/es/dynamic-input').then((res) => res.NDynamicInput),
 );
-
+const Sendcode = defineAsyncComponent(() =>
+  import('#/components/send-code.vue').then((res) => res.default),
+);
+const PhoneInput = defineAsyncComponent(() =>
+  import('#/components/phone-input.vue').then((res) => res.default),
+);
 const withDefaultPlaceholder = <T extends Component>(
   component: T,
   type: 'input' | 'select',
@@ -113,8 +118,10 @@ export type ComponentType =
   | 'IconPicker'
   | 'Input'
   | 'InputNumber'
+  | 'PhoneInput'
   | 'RadioGroup'
   | 'Select'
+  | 'Sendcode'
   | 'Space'
   | 'Switch'
   | 'TimePicker'
@@ -217,6 +224,20 @@ async function initComponentAdapter() {
     TreeSelect: withDefaultPlaceholder(NTreeSelect, 'select'),
     Upload: NUpload,
     DynamicInput: NDynamicInput,
+    Sendcode: withDefaultPlaceholder(Sendcode, 'input', {
+      component: NInput,
+      modelPropName: 'code',
+      inputProps: {
+        placeholder: $t('ui.placeholder.input'),
+      },
+    }),
+    PhoneInput: withDefaultPlaceholder(PhoneInput, 'input', {
+      component: NInput,
+      modelPropName: 'value',
+      inputProps: {
+        placeholder: $t('ui.placeholder.input'),
+      },
+    }),
   };
 
   // 将组件注册到全局共享状态中

@@ -111,7 +111,8 @@ const authFunc = async (params: Recordable<any>) => {
 };
 
 onMounted(() => {
-  groupName.value = route.query.groupName ?? 'built-in';
+  window.console.log(route.params);
+  groupName.value = route.params.groupName ?? 'built-in';
 
   getGroupWithApplicationApi({
     groupName: groupName.value,
@@ -191,8 +192,8 @@ const formSchema = computed((): VbenFormSchema[] => {
         placeholder: $t('authentication.code'),
       },
       dependencies: {
-        triggerFields: [''],
-        show: () => {
+        triggerFields: ['name'],
+        if: () => {
           return !!captchaProvider.value;
         },
       },
@@ -259,6 +260,7 @@ const handleLoginToThirdPart = (item: any) => {
 <template>
   <div>
     <AuthenticationLogin
+      :register-path="`/auth/register/${groupName}`"
       :form-schema="formSchema"
       :loading="authStore.loginLoading"
       @submit="authFunc"
