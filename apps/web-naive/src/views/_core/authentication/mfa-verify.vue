@@ -58,6 +58,7 @@ const handleResend = async (captchaInfo: any, captchaCode: any) => {
     <NH3 v-if="curType === 'Email'" class="text-center">邮箱</NH3>
     <NH3 v-if="curType === 'TOTP'" class="text-center">TOTP</NH3>
     <NH3 v-if="curType === 'Phone'" class="text-center">手机</NH3>
+    <NH3 v-if="curType === 'RecoveryCode'" class="text-center">救援代码</NH3>
 
     <SendCode
       :disable-destination="true"
@@ -84,5 +85,10 @@ const handleResend = async (captchaInfo: any, captchaCode: any) => {
         </NButton>
       </li>
     </template>
+    <li v-if="curType !== 'RecoveryCode'">
+      <NButton type="primary" text @click="curType = 'RecoveryCode'">
+        使用救援代码
+      </NButton>
+    </li>
   </NSpace>
 </template>

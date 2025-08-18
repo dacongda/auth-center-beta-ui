@@ -299,6 +299,7 @@ async function handleSubmit(value: Recordable<any>) {
   <AuthenticationRegister
     ref="registerRef"
     title="创建账号"
+    :login-path="`/auth/login/${groupName}`"
     sub-title=" "
     :form-schema="formSchema"
     :loading="loading"

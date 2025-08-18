@@ -72,7 +72,7 @@ const renewCaptcha = async () => {
       />
     </template>
     <div
-      v-if="props.type !== 'TOTP'"
+      v-if="props.type !== 'TOTP' && props.type !== 'RecoveryCode'"
       class="relative m-2 flex w-full items-center"
     >
       <NInput class="flex" v-model:value="captchaCode" />
@@ -85,12 +85,23 @@ const renewCaptcha = async () => {
       </div>
     </div>
 
+    <NInput
+      v-if="props.type === 'RecoveryCode'"
+      v-model:value="code"
+      placeholder="请输入救援代码"
+    />
+
     <NSpace
-      :justify="props.type === 'TOTP' ? 'center' : 'space-around'"
+      :justify="
+        props.type === 'TOTP' || props.type === 'RecoveryCode'
+          ? 'center'
+          : 'space-around'
+      "
       align="center"
       v-if="!props.disableCodeInput"
     >
       <NInputOtp
+        v-if="props.type !== 'RecoveryCode'"
         class="m-2"
         @update-value="
           (el) => {
@@ -99,7 +110,7 @@ const renewCaptcha = async () => {
         "
       />
       <NButton
-        v-if="props.type !== 'TOTP'"
+        v-if="props.type !== 'TOTP' && props.type !== 'RecoveryCode'"
         :disabled="countActive || isLoading"
         :loading="countActive || isLoading"
         @click="handleOnResend"

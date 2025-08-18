@@ -26,7 +26,7 @@ export const gridOptions: VxeGridProps = {
   // keepSource: true,
   proxyConfig: {
     ajax: {
-      query: async ({ page, sort }) => {
+      query: async ({ page, sort }: any) => {
         return await getProvidersApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -109,7 +109,145 @@ export const providerFieldArray: any = {
       { name: 'port', label: '端口', default: 463 },
       { name: 'enableSSL', label: '启用加密' },
       { name: 'subject', label: '主题' },
-      { name: 'body', label: '内容' },
+      { name: 'body', label: '验证码内容' },
+      { name: 'linkBody', label: '链接内容' },
     ],
   },
+};
+
+const DefaultEmailBody = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>您的验证码</title>
+  </head>
+  <body>
+    <style>
+      body {
+        background: #f6f8fa;
+        font-family: "Segoe UI", "Arial", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 400px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        padding: 32px 24px;
+      }
+      .title {
+        font-size: 22px;
+        color: #222;
+        font-weight: 600;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+      .desc {
+        color: #666;
+        font-size: 15px;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+      .code-box {
+        background: #f0f4f8;
+        border-radius: 6px;
+        padding: 18px 0;
+        text-align: center;
+        font-size: 32px;
+        letter-spacing: 12px;
+        color: #0078d4;
+        font-weight: bold;
+        margin-bottom: 24px;
+      }
+      .tip {
+        color: #999;
+        font-size: 13px;
+        text-align: center;
+      }
+    </style>
+    <div class="container">
+      <div class="title">您的验证码</div>
+      <div class="desc">请在提示时间内输入以下验证码</div>
+      <div class="code-box">%code%</div>
+      <div class="tip">验证码有效期为2分钟，请勿泄露给他人。</div>
+    </div>
+  </body>
+</html>
+`;
+
+const DefaultLinkBody = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>您的验证码</title>
+    <style>
+        body {
+            background: #f6f8fa;
+            font-family: 'Segoe UI', 'Arial', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 32px 24px;
+        }
+        .title {
+            font-size: 22px;
+            color: #222;
+            font-weight: 600;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .desc {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .code-box {
+            background: #f0f4f8;
+            border-radius: 6px;
+            padding: 18px 0;
+            text-align: center;
+            font-size: 32px;
+            color: #0078d4;
+            font-weight: bold;
+            margin-bottom: 24px;
+        }
+        .tip {
+            color: #999;
+            font-size: 13px;
+            text-align: center;
+        }
+        .link {
+          color: #0078d4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">重置密码链接</div>
+        <div class="desc">请在提示时间内进入链接并重置密码</div>
+        <div class="code-box"><a href="%link%" class="link">重置密码</a></div>
+        <div class="tip">链接有效期为2分钟，请尽快重置。</div>
+      	<div class="tip" style="text-align: left; margin-top:20px;">或复制此链接 %link%</div>
+      
+    </div>
+</body>
+</html>
+`;
+
+export const DefaultEmailTemplate = {
+  body: DefaultEmailBody,
+  linkBody: DefaultLinkBody,
 };

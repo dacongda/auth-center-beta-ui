@@ -99,6 +99,24 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'ForgetPasswordGroup',
+        path: 'forget-password/:groupName',
+        component: () =>
+          import('#/views/_core/authentication/forget-password.vue'),
+        meta: {
+          title: $t('page.auth.forgetPassword'),
+        },
+      },
+      {
+        name: 'ConfirmForgetPassword',
+        path: 'confirm-forget/:groupName',
+        component: () =>
+          import('#/views/_core/authentication/confirm-forget.vue'),
+        meta: {
+          title: $t('page.auth.forgetPassword'),
+        },
+      },
+      {
         name: 'Register',
         path: 'register',
         component: () => import('#/views/_core/authentication/register.vue'),

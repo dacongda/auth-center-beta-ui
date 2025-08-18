@@ -1,6 +1,4 @@
 <script lang="tsx" setup>
-import type { LocationQuery } from 'vue-router';
-
 import type { VbenFormSchema } from '@vben/common-ui';
 import type { Recordable } from '@vben/types';
 
@@ -28,7 +26,7 @@ const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 
-const oAuthParms: LocationQuery = route.query;
+const oAuthParms: any = route.query;
 const groupName: any = ref('built-in');
 const group: any = ref();
 const application: any = ref();
@@ -96,6 +94,7 @@ const authFunc = async (params: Recordable<any>) => {
     params.type = 'oauth';
   } else if (route.name === 'SAMLLogin') {
     params.type = 'saml';
+    oAuthParms.client_id = route.params.clientId?.toString();
   } else {
     params.type = 'login';
   }
@@ -227,13 +226,17 @@ const getLoginType = () => {
 
 const handleLoginToThirdPart = (item: any) => {
   if (item.subType === 'OAuth2') {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (route.name === 'SAMLLogin') {
+      searchParams.set('client_id', route.params.clientId?.toString() ?? '');
+    }
     const state = {
       applicationId: application.value.id,
       applicationName: application.value.name,
       groupName: group.value.name,
       providerName: item.name,
       type: getLoginType(),
-      search: Object.fromEntries(new URLSearchParams(window.location.search)),
+      search: Object.fromEntries(searchParams),
     };
 
     const stateJson = JSON.stringify(state);

@@ -26,7 +26,7 @@ export const applicationGridOptions: VxeGridProps = {
   keepSource: true,
   proxyConfig: {
     ajax: {
-      query: async ({ page, sort }) => {
+      query: async ({ page, sort }: any) => {
         return await getApplicationsApi({
           page: page.currentPage,
           pageSize: page.pageSize,
@@ -80,6 +80,7 @@ export const providerRule: any = {
       options: [
         { label: '默认', value: 'Default' },
         { label: '注册', value: 'Register' },
+        { label: '忘记密码', value: 'ForgetPassword' },
       ],
       multiple: true,
     },

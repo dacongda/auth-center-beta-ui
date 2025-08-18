@@ -90,3 +90,17 @@ export async function sendVerificationCodeApi(data: any) {
 export async function revokeTokenApi(data: any) {
   return baseRequest2Client.post('/auth/revokeToken', data);
 }
+
+/**
+ * 发送重置邮件
+ */
+export async function sendForgetPasswordLink(data: any) {
+  return baseRequest2Client.post('/auth/sendForgetPasswordLink', data);
+}
+
+/**
+ * 重置密码
+ */
+export async function resetPasswordApi(data: any) {
+  return baseRequest2Client.post('/auth/resetPassword', data);
+}

@@ -3,14 +3,13 @@ import type { VbenFormSchema } from '@vben/common-ui';
 import type { Recordable } from '@vben/types';
 
 import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { AuthenticationForgetPassword, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
 import { message } from '#/adapter/naive';
-import { sendForgetPasswordLink } from '#/api';
-import { getCaptcha } from '#/api/core/captcha';
+import { resetPasswordApi } from '#/api';
 import { getGroupWithApplicationApi } from '#/api/core/group';
 import { useAuthStore } from '#/store';
 
@@ -20,19 +19,18 @@ const loading = ref(false);
 
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
 
 const groupName: any = ref('built-in');
 const group: any = ref();
 const application: any = ref();
-
-const captchaProvider: any = ref();
 const authProviers = ref<any[]>();
-const emailProvider = ref<any>();
 
-const captchaInfo: any = ref();
+const token: any = ref();
 
 onMounted(() => {
   groupName.value = route.params.groupName ?? 'built-in';
+  token.value = route.query?.token;
 
   getGroupWithApplicationApi({
     groupName: groupName.value,
@@ -44,20 +42,9 @@ onMounted(() => {
         groupName.value = group.value.name;
         application.value = res.defaultApplication;
         authStore.loginApplication = res.defaultApplication;
-
-        captchaProvider.value = res.defaultApplication?.providers.find(
-          (p: any) => p.type === 'Captcha',
-        );
-
-        emailProvider.value = res.defaultApplication?.providerItems.find(
-          (p: any) => p.type === 'Email' && p.rule.includes('ForgetPassword'),
-        );
-
         authProviers.value = res.defaultApplication?.providers.filter(
           (p: any) => p.type === 'Auth',
         );
-
-        renewCaptcha();
       }
     })
     .catch(() => {
@@ -68,60 +55,56 @@ onMounted(() => {
 const formSchema = computed((): VbenFormSchema[] => {
   return [
     {
-      component: 'VbenInput',
+      component: 'VbenInputPassword',
       componentProps: {
-        placeholder: 'example@example.com',
+        passwordStrength: true,
+        placeholder: $t('authentication.password'),
       },
-      fieldName: 'destination',
-      label: $t('authentication.email'),
-      rules: z
-        .string()
-        .min(1, { message: $t('authentication.emailTip') })
-        .email($t('authentication.emailValidErrorTip')),
+      fieldName: 'password',
+      label: $t('authentication.password'),
+      renderComponentContent() {
+        return {
+          strengthText: () => $t('authentication.passwordStrength'),
+        };
+      },
+      rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
     },
     {
-      component: 'VbenInput',
+      component: 'VbenInputPassword',
       componentProps: {
-        placeholder: $t('authentication.code'),
+        placeholder: $t('authentication.confirmPassword'),
       },
       dependencies: {
-        triggerFields: ['destination'],
-        if: () => {
-          return !!captchaProvider.value;
+        rules(values) {
+          const { password } = values;
+          return z
+            .string({ required_error: $t('authentication.passwordTip') })
+            .min(1, { message: $t('authentication.passwordTip') })
+            .refine((value) => value === password, {
+              message: $t('authentication.confirmPasswordTip'),
+            });
         },
+        triggerFields: ['password'],
       },
-      fieldName: 'captchaCode',
-      label: $t('authentication.code'),
-      rules: z.string().min(1, { message: '请输入验证码' }),
-      suffix: () => {
-        return (
-          <img
-            onClick={renewCaptcha}
-            src={`data:image/bmp;base64,${captchaInfo.value?.captchaImg}`}
-            style="height: 2.5rem"
-          />
-        );
-      },
+      fieldName: 'confirmPassword',
+      label: $t('authentication.confirmPassword'),
     },
   ];
 });
 
-const renewCaptcha = async () => {
-  captchaInfo.value = await getCaptcha({
-    applicationId: application.value.id,
-  });
-};
-
 function handleSubmit(value: Recordable<any>) {
   loading.value = true;
   value.applicationId = application.value.id;
-  value.captchaId = captchaInfo.value?.captchaId;
-  sendForgetPasswordLink(value)
+  value.resetToken = token.value;
+  resetPasswordApi(value)
     .then(() => {
-      message.success('发送成功，请注意查收邮件');
-    })
-    .catch(() => {
-      renewCaptcha();
+      message.success('重置成功');
+      router.push({
+        name: 'LoginGroup',
+        params: {
+          groupName: groupName.value,
+        },
+      });
     })
     .finally(() => {
       loading.value = false;
@@ -131,13 +114,13 @@ function handleSubmit(value: Recordable<any>) {
 
 <template>
   <AuthenticationForgetPassword
-    :login-path="`/auth/register/${groupName}`"
+    :login-path="`/auth/login/${groupName}`"
+    submit-button-text="重置"
     :form-schema="formSchema"
     :loading="loading"
+    sub-title=" "
     @submit="handleSubmit"
   >
-    <template #title>
-      {{ $t('authentication.forgetPassword') }}
-    </template>
+    <template #title> 重置密码 </template>
   </AuthenticationForgetPassword>
 </template>
