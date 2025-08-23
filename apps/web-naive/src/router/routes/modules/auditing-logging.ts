@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'AuditingLogging',
     path: '/auditing-logging',
+    redirect: '/auditing-logging/logging',
     children: [
       {
         meta: {

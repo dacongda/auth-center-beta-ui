@@ -50,6 +50,17 @@ export async function importUserApi(groupId: any, file: File) {
 }
 
 /**
+ * 更新用户头像
+ */
+export async function updateUserAvatarApi(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return baseRequest2Client.post('/user/updateAvatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+/**
  * 更新用户
  */
 export async function updateUserApi(data: any) {

@@ -7,10 +7,12 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
+import { createPostFormAndSubmit } from '@vben/utils';
 
 import { NButton, NFlex, NTabPane, NTabs } from 'naive-ui';
 
 import { message } from '#/adapter/naive';
+import { getSamlRequestApi } from '#/api';
 import { getCaptcha } from '#/api/core/captcha';
 import { getGroupWithApplicationApi } from '#/api/core/group';
 import {
@@ -90,7 +92,11 @@ const authFunc = async (params: Recordable<any>) => {
     }
   }
 
-  if (oAuthParms?.response_type?.includes('code')) {
+  if (
+    oAuthParms?.response_type?.includes('code') ||
+    oAuthParms?.response_type?.includes('id_token') ||
+    oAuthParms?.response_type?.includes('token')
+  ) {
     params.type = 'oauth';
   } else if (route.name === 'SAMLLogin') {
     params.type = 'saml';
@@ -224,27 +230,28 @@ const getLoginType = () => {
   }
 };
 
-const handleLoginToThirdPart = (item: any) => {
+const handleLoginToThirdPart = async (item: any) => {
+  const searchParams = new URLSearchParams(window.location.search);
+  if (route.name === 'SAMLLogin') {
+    searchParams.set('client_id', route.params.clientId?.toString() ?? '');
+  }
+  const state = {
+    applicationId: application.value.id,
+    clientId: oAuthParms?.client_id,
+    applicationName: application.value.name,
+    groupName: group.value.name,
+    providerName: item.name,
+    type: getLoginType(),
+    search: Object.fromEntries(searchParams),
+  };
+
+  const stateJson = JSON.stringify(state);
+  const encodedState = btoa(stateJson)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replaceAll(/=*$/g, '');
+
   if (item.subType === 'OAuth2') {
-    const searchParams = new URLSearchParams(window.location.search);
-    if (route.name === 'SAMLLogin') {
-      searchParams.set('client_id', route.params.clientId?.toString() ?? '');
-    }
-    const state = {
-      applicationId: application.value.id,
-      applicationName: application.value.name,
-      groupName: group.value.name,
-      providerName: item.name,
-      type: getLoginType(),
-      search: Object.fromEntries(searchParams),
-    };
-
-    const stateJson = JSON.stringify(state);
-    const encodedState = btoa(stateJson)
-      .replaceAll('+', '-')
-      .replaceAll('/', '_')
-      .replaceAll(/=*$/g, '');
-
     const params = new URLSearchParams();
     params.set('client_id', item.clientId);
     params.set('redirect_uri', `${window.location.origin}/auth/callback`);
@@ -254,6 +261,27 @@ const handleLoginToThirdPart = (item: any) => {
     params.set('state', encodedState);
 
     window.location.href = `${item.authEndpoint}?${params.toString()}`;
+    return;
+  } else if (item.subType === 'SAML') {
+    const providerItem = application.value.providerItems.find(
+      (p: any) => p.providerId === item.id,
+    );
+
+    const { request, bingding, location } = await getSamlRequestApi({
+      id: item.id,
+      isCompressed: providerItem.rule?.includes('Compressed'),
+    });
+
+    const params = new URLSearchParams();
+    params.set('SAMLRequest', request);
+    params.set('RelayState', encodedState);
+
+    if (bingding === 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST') {
+      createPostFormAndSubmit(params, location);
+    }
+
+    window.location.href = `${location}?${params.toString()}`;
+    return;
   }
 
   window.console.log('未实现');

@@ -68,6 +68,7 @@ export const providerTypes: any = {
   Captcha: ['Default', 'Aliyun'],
   Email: ['SMTP'],
   Auth: ['OAuth2', 'OIDC', 'SAML'],
+  Storage: ['Local', 'S3'],
 };
 
 export const providerTypesObject = Object.keys(providerTypes).map((el) => {
@@ -89,6 +90,22 @@ export const providerFieldArray: any = {
       { name: 'clientSecret', label: 'accessKeySecret' },
       { name: 'configureUrl', label: 'OIDC Discovery' },
       { name: 'enableSSL', label: '使用用户信息端点' },
+      { name: 'scopes', label: 'Scopes' },
+      {
+        name: 'jwksEndpoint',
+        label: 'jwk端点',
+      },
+      {
+        name: 'body',
+        label: 'jwks',
+        type: 'textarea',
+        placeholder: '若为空，则会直接访问jwks端点获取',
+      },
+      { name: 'tokenType', label: 'response type' },
+      { name: 'authEndpoint', label: '登陆端点', type: 'textarea' },
+      { name: 'tokenEndpoint', label: 'Token端点' },
+      { name: 'userInfoEndpoint', label: '用户信息端点' },
+      { name: 'userInfoMap', label: '用户映射' },
     ],
     OAuth2: [
       { name: 'clientId', label: 'accessKeyId' },
@@ -98,6 +115,12 @@ export const providerFieldArray: any = {
       { name: 'tokenType', label: 'Token类型', default: 'Bearer' },
       { name: 'userInfoEndpoint', label: '用户信息端点' },
       { name: 'scopes', label: 'Scopes' },
+      { name: 'userInfoMap', label: '用户映射' },
+    ],
+    SAML: [
+      { name: 'configureUrl', label: 'IDP元数据链接' },
+      { name: 'body', label: 'IDP元数据', type: 'textarea' },
+      { name: 'enableSSL', label: 'Request签名' },
       { name: 'userInfoMap', label: '用户映射' },
     ],
   },
@@ -111,6 +134,19 @@ export const providerFieldArray: any = {
       { name: 'subject', label: '主题' },
       { name: 'body', label: '验证码内容' },
       { name: 'linkBody', label: '链接内容' },
+    ],
+  },
+  Storage: {
+    Local: [{ name: 'body', label: '路径前缀' }],
+    S3: [
+      { name: 'configureUrl', label: '端点' },
+      { name: 'clientId', label: 'Access Key' },
+      { name: 'clientSecret', label: 'Secret Key' },
+      { name: 'enableSSL', label: '启用HTTPS' },
+      { name: 'subject', label: '存储桶' },
+      { name: 'body', label: '前缀' },
+      { name: 'authEndpoint', label: 'Path格式' },
+      { name: 'regionId', label: '区域' },
     ],
   },
 };

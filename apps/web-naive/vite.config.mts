@@ -5,6 +5,7 @@ export default defineConfig(async () => {
     application: {},
     vite: {
       server: {
+        allowedHosts: ['test.puiying.cn'],
         proxy: {
           '/.well-known': {
             changeOrigin: true,

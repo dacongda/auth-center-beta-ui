@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'Management',
     path: '/management',
+    redirect: '/management/user',
     children: [
       {
         meta: {

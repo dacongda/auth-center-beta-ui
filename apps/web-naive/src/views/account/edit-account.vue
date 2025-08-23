@@ -149,6 +149,7 @@ const diaplaySidebar = computed(() => {
               :inherit-roles="userInheritRoles"
               :groups="groupFlat"
               v-if="menuKey === 'BasicInfo'"
+              @update-user-info="updateUserInfo"
             />
             <EditSafeInfo
               v-model:user-info="myInfo"

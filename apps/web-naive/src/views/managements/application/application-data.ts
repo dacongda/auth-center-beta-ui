@@ -93,5 +93,23 @@ export const providerRule: any = {
       ],
       multiple: true,
     },
+    SAML: {
+      options: [
+        { label: '登陆', value: 'Login' },
+        { label: '注册', value: 'Register' },
+        { label: '压缩请求', value: 'Compressed' },
+      ],
+      multiple: true,
+    },
+  },
+  Storage: {
+    Local: {
+      options: [],
+      multiple: true,
+    },
+    S3: {
+      options: [],
+      multiple: true,
+    },
   },
 };

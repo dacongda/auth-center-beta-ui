@@ -29,7 +29,16 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function handleOAuthLogin(res: any, oAuthParms: any) {
     const params = new URLSearchParams();
-    params.set('code', res.code);
+    if (res?.code) {
+      params.set('code', res.code);
+    }
+    if (res?.id_token) {
+      params.set('id_token', res.id_token);
+    }
+    if (res?.token) {
+      params.set('access_token', res.token);
+    }
+
     if (oAuthParms.nonce) {
       params.set('nonce', oAuthParms.nonce);
     }
@@ -50,6 +59,8 @@ export const useAuthStore = defineStore('auth', () => {
     params.set('SAMLResponse', res.samlResponse);
     if (oAuthParms.RelayState) {
       params.set('RelayState', oAuthParms.RelayState);
+    } else if (res.relayState) {
+      params.set('RelayState', res.relayState);
     }
 
     if (

@@ -91,7 +91,7 @@ const updatePasskey = async () => {
 
 passkeySupported.value =
   navigator?.credentials &&
-  (window.location.protocol === 'https' ||
+  (window.location.protocol === 'https:' ||
     window.location.hostname === 'localhost');
 </script>
 <template>

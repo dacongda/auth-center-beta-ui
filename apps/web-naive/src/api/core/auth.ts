@@ -104,3 +104,10 @@ export async function sendForgetPasswordLink(data: any) {
 export async function resetPasswordApi(data: any) {
   return baseRequest2Client.post('/auth/resetPassword', data);
 }
+
+/**
+ * 获取SAML Request
+ */
+export async function getSamlRequestApi(query: any) {
+  return baseRequest2Client.get('/saml/getSamlRequest', { params: query });
+}

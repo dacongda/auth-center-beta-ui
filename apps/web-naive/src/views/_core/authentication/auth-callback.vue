@@ -16,6 +16,8 @@ const router = useRouter();
 
 onMounted(async () => {
   const searchParams = new URLSearchParams(window.location.search);
+  let loginParams: any = {};
+  let loginSearch: any = {};
   if (searchParams.get('state')) {
     const state = searchParams.get('state');
     const parsedState = base64UrlTobase64(state ?? '');
@@ -38,19 +40,49 @@ onMounted(async () => {
       authStore.loginApplication = res.defaultApplication;
     }
 
-    try {
-      const res = await authStore.authLogin(param, stateObj.search);
-
-      if (res?.requireMfa) {
-        router.push({ name: 'MfaVerify' });
-      }
-    } catch (error: any) {
-      console.error(error);
-      failMessage.value = error.message;
+    loginParams = param;
+    loginSearch = stateObj.search;
+  } else if (searchParams.get('SAMLResponse')) {
+    const state = searchParams.get('RelayState');
+    if (!state) {
+      failMessage.value = 'RelayState不可为空';
       fail.value = true;
     }
-  } else if (searchParams.get('SAMLResponse')) {
-    window.console.log('未实现');
+
+    const parsedState = base64UrlTobase64(state ?? '');
+    const stateObj = JSON.parse(parsedState);
+
+    const param: any = {};
+    param.loginMethod = 'ThirdPart';
+    param.type = stateObj.type;
+    param.code = stateObj.providerName;
+    param.name = 'V';
+    param.password = searchParams.get('SAMLResponse');
+    param.groupName = stateObj.groupName;
+
+    const res = await getGroupWithApplicationApi({
+      groupName: stateObj.groupName,
+      applicationId: stateObj.applicationId,
+    });
+
+    if (res?.defaultApplication) {
+      authStore.loginApplication = res.defaultApplication;
+    }
+
+    loginSearch = stateObj.search;
+    loginParams = param;
+  }
+
+  try {
+    const res = await authStore.authLogin(loginParams, loginSearch);
+
+    if (res?.requireMfa) {
+      router.push({ name: 'MfaVerify' });
+    }
+  } catch (error: any) {
+    console.error(error);
+    failMessage.value = error.message;
+    fail.value = true;
   }
 });
 </script>

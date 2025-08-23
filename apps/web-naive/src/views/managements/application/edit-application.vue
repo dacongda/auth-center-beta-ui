@@ -164,7 +164,6 @@ const downloadLink = () => {
   if (samlLinkGroupId.value) {
     val += `-${samlLinkGroupId.value}`;
   }
-  window.console.log(val);
   fetch(val)
     .then((response) => response.blob())
     .then((blob) => {
@@ -282,6 +281,70 @@ const accessGroupOptions = computed(() => {
             <NFormItem label="SAML受众">
               <NDynamicInput v-model:value="appFormValue.value.samlAudiences" />
             </NFormItem>
+            <NFormItem label="SAML重定向">
+              <NDynamicInput
+                v-model:value="appFormValue.value.samlRedirects"
+                :on-create="
+                  () => {
+                    return { issuer: '', redirectUrl: '' };
+                  }
+                "
+              >
+                <template #default="{ value }">
+                  <NInput v-model:value="value.issuer" placeholder="Issuer" />
+                  <NInput
+                    v-model:value="value.redirectUrl"
+                    placeholder="Redirect URL"
+                  />
+                </template>
+              </NDynamicInput>
+            </NFormItem>
+            <NFormItem label="SAML属性">
+              <NDynamicInput
+                v-model:value="appFormValue.value.samlAttributes"
+                :on-create="
+                  () => {
+                    return { name: '', nameFormat: null, value: '' };
+                  }
+                "
+              >
+                <template #default="{ value }">
+                  <NInput v-model:value="value.name" placeholder="name" />
+                  <NSelect
+                    :options="[
+                      {
+                        label: 'unspecified',
+                        value:
+                          'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
+                      },
+                      {
+                        label: 'persistent',
+                        value:
+                          'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
+                      },
+                      {
+                        label: 'transient',
+                        value:
+                          'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
+                      },
+                      {
+                        label: 'basic',
+                        value:
+                          'urn:oasis:names:tc:SAML:2.0:attrname-format:basic',
+                      },
+                      {
+                        label: 'uri',
+                        value:
+                          'urn:oasis:names:tc:SAML:2.0:attrname-format:uri',
+                      },
+                    ]"
+                    v-model:value="value.nameFormat"
+                    placeholder="nameFormat"
+                  />
+                  <NInput v-model:value="value.value" placeholder="value" />
+                </template>
+              </NDynamicInput>
+            </NFormItem>
             <NFormItem label="Scopes">
               <NSelect
                 :options="[
@@ -335,13 +398,13 @@ const accessGroupOptions = computed(() => {
             </NFormItem>
             <NFormItem label="SAML响应压缩">
               <NSwitch
-                v-model:checked="appFormValue.value.samlResponseCompress"
+                v-model:value="appFormValue.value.samlResponseCompress"
               />
             </NFormItem>
             <NFormItem label="SAML数据加密">
-              <NSwitch v-model:checked="appFormValue.value.samlEncrypt" />
+              <NSwitch v-model:value="appFormValue.value.samlEncrypt" />
             </NFormItem>
-            <NFormItem label="Scopes">
+            <NFormItem label="证书">
               <NSelect
                 :options="certList"
                 value-field="id"
@@ -379,9 +442,10 @@ const accessGroupOptions = computed(() => {
             <NFormItem label="提供商列表">
               <NDynamicInput
                 v-model:value="appFormValue.value.providerItems"
+                show-sort-button
                 :on-create="
                   () => {
-                    return { providerId: null, type: '', rule: '' };
+                    return { providerId: null, type: '', rule: [] };
                   }
                 "
               >

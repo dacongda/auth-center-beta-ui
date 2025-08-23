@@ -13,6 +13,7 @@ const routes: RouteRecordRaw[] = [
     },
     name: 'AuthSafe',
     path: '/auth-safe',
+    redirect: '/auth-safe/application',
     children: [
       {
         meta: {

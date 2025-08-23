@@ -96,6 +96,26 @@ const getPurifiedBody = (body: string) => {
     },
   );
 };
+
+const getSAMLMetadata = () => {
+  providerFormValue.value.body = '';
+  fetch(providerFormValue.value.configureUrl)
+    .then((response) => response.text())
+    .then((data) => {
+      providerFormValue.value.body = data;
+    });
+};
+
+const getODICConfiguration = () => {
+  fetch(providerFormValue.value.configureUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      providerFormValue.value.authEndpoint = data.authorization_endpoint;
+      providerFormValue.value.tokenEndpoint = data.token_endpoint;
+      providerFormValue.value.userInfoEndpoint = data.userinfo_endpoint;
+      providerFormValue.value.jwksEndpoint = data.jwks_uri;
+    });
+};
 </script>
 <template>
   <Page :title="route.name === 'AddProvider' ? '新增提供商' : '编辑提供商'">
@@ -182,6 +202,22 @@ const getPurifiedBody = (body: string) => {
                   <NInput
                     v-model:value="providerFormValue.value.configureUrl"
                   />
+                  <NButton
+                    v-if="providerFormValue.value.subType === 'SAML'"
+                    type="primary"
+                    secondary
+                    @click="getSAMLMetadata"
+                  >
+                    获取元数据
+                  </NButton>
+                  <NButton
+                    v-if="providerFormValue.value.subType === 'OIDC'"
+                    type="primary"
+                    secondary
+                    @click="getODICConfiguration"
+                  >
+                    获取配置数据
+                  </NButton>
                 </NFormItemGi>
 
                 <NFormItemGi
@@ -190,6 +226,16 @@ const getPurifiedBody = (body: string) => {
                   :label="field.label"
                 >
                   <NInput
+                    v-if="providerFormValue.value.subType !== 'S3'"
+                    v-model:value="providerFormValue.value.authEndpoint"
+                  />
+
+                  <NSelect
+                    v-else
+                    :options="[
+                      { label: 'Path', value: 'Path' },
+                      { label: 'Virtual-Host', value: 'Virtual-Host' },
+                    ]"
                     v-model:value="providerFormValue.value.authEndpoint"
                   />
                 </NFormItemGi>
@@ -201,6 +247,16 @@ const getPurifiedBody = (body: string) => {
                 >
                   <NInput
                     v-model:value="providerFormValue.value.tokenEndpoint"
+                  />
+                </NFormItemGi>
+
+                <NFormItemGi
+                  :span="2"
+                  v-if="field.name === 'jwksEndpoint'"
+                  :label="field.label"
+                >
+                  <NInput
+                    v-model:value="providerFormValue.value.jwksEndpoint"
                   />
                 </NFormItemGi>
 
@@ -314,78 +370,94 @@ const getPurifiedBody = (body: string) => {
                   <NInput v-model:value="providerFormValue.value.subject" />
                 </NFormItemGi>
 
-                <NFormItemGi :span="2" v-if="field.name === 'body'" label=" ">
-                  <NButton
-                    type="primary"
-                    secondary
-                    @click="
-                      providerFormValue.value.body = DefaultEmailTemplate.body
-                    "
+                <template v-if="providerFormValue.value.type === 'Email'">
+                  <NFormItemGi :span="2" v-if="field.name === 'body'" label=" ">
+                    <NButton
+                      type="primary"
+                      secondary
+                      @click="
+                        providerFormValue.value.body = DefaultEmailTemplate.body
+                      "
+                    >
+                      重置默认
+                    </NButton>
+                  </NFormItemGi>
+                  <NFormItemGi
+                    span="2 l:1"
+                    v-if="field.name === 'body'"
+                    :label="field.label"
                   >
-                    重置默认
-                  </NButton>
-                </NFormItemGi>
-                <NFormItemGi
-                  span="2 l:1"
-                  v-if="field.name === 'body'"
-                  :label="field.label"
-                >
-                  <NInput
-                    type="textarea"
-                    :rows="10"
-                    v-model:value="providerFormValue.value.body"
-                  />
-                </NFormItemGi>
-                <NFormItemGi
-                  span="2 l:1"
-                  v-if="field.name === 'body'"
-                  :label="`${field.label}预览`"
-                >
-                  <NCard>
-                    <div
-                      v-html="getPurifiedBody(providerFormValue.value.body)"
-                    ></div>
-                  </NCard>
-                </NFormItemGi>
-
-                <NFormItemGi
-                  :span="2"
-                  v-if="field.name === 'linkBody'"
-                  label=" "
-                >
-                  <NButton
-                    type="primary"
-                    secondary
-                    @click="
-                      providerFormValue.value.linkBody =
-                        DefaultEmailTemplate.linkBody
-                    "
+                    <NInput
+                      type="textarea"
+                      :rows="10"
+                      v-model:value="providerFormValue.value.body"
+                    />
+                  </NFormItemGi>
+                  <NFormItemGi
+                    span="2 l:1"
+                    v-if="field.name === 'body'"
+                    :label="`${field.label}预览`"
                   >
-                    重置默认
-                  </NButton>
-                </NFormItemGi>
-                <NFormItemGi
-                  span="2 l:1"
-                  v-if="field.name === 'linkBody'"
-                  :label="field.label"
-                >
-                  <NInput
-                    type="textarea"
-                    :rows="10"
-                    v-model:value="providerFormValue.value.linkBody"
-                  />
-                </NFormItemGi>
-                <NFormItemGi
-                  span="2 l:1"
-                  v-if="field.name === 'linkBody'"
-                  :label="`${field.label}预览`"
-                >
-                  <NCard>
-                    <div
-                      v-html="getPurifiedBody(providerFormValue.value.linkBody)"
-                    ></div>
-                  </NCard>
-                </NFormItemGi>
+                    <NCard>
+                      <div
+                        v-html="getPurifiedBody(providerFormValue.value.body)"
+                      ></div>
+                    </NCard>
+                  </NFormItemGi>
+                  <NFormItemGi
+                    :span="2"
+                    v-if="field.name === 'linkBody'"
+                    label=" "
+                  >
+                    <NButton
+                      type="primary"
+                      secondary
+                      @click="
+                        providerFormValue.value.linkBody =
+                          DefaultEmailTemplate.linkBody
+                      "
+                    >
+                      重置默认
+                    </NButton>
+                  </NFormItemGi>
+                  <NFormItemGi
+                    span="2 l:1"
+                    v-if="field.name === 'linkBody'"
+                    :label="field.label"
+                  >
+                    <NInput
+                      type="textarea"
+                      :rows="10"
+                      v-model:value="providerFormValue.value.linkBody"
+                    />
+                  </NFormItemGi>
+                  <NFormItemGi
+                    span="2 l:1"
+                    v-if="field.name === 'linkBody'"
+                    :label="`${field.label}预览`"
+                  >
+                    <NCard>
+                      <div
+                        v-html="
+                          getPurifiedBody(providerFormValue.value.linkBody)
+                        "
+                      ></div>
+                    </NCard>
+                  </NFormItemGi>
+                </template>
+                <template v-else>
+                  <NFormItemGi
+                    :span="2"
+                    v-if="field.name === 'body'"
+                    :label="field.label"
+                  >
+                    <NInput
+                      :placeholder="field.placeholder ?? undefined"
+                      v-model:value="providerFormValue.value.body"
+                      :type="field.type ?? 'text'"
+                    />
+                  </NFormItemGi>
+                </template>
 
                 <NFormItemGi
                   :span="2"

@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 
 import { useUserStore } from '@vben/stores';
+import { createPostFormAndSubmit } from '@vben/utils';
 
 import {
   NAvatar,
@@ -16,7 +17,11 @@ import {
 } from 'naive-ui';
 
 import { message } from '#/adapter/naive';
-import { myThirdPartBindApi, unBindThirdPartApi } from '#/api';
+import {
+  getSamlRequestApi,
+  myThirdPartBindApi,
+  unBindThirdPartApi,
+} from '#/api';
 
 const userinfo = defineModel<any>('userInfo', { default: {} });
 const dbUserInfo = useUserStore();
@@ -28,23 +33,22 @@ const authProviers = application?.providers.filter(
 
 const userThirdPardBindList = ref<any[]>([]);
 
-const handleBindIdp = (item: any) => {
-  window.console.log(item);
+const handleBindIdp = async (item: any) => {
+  const state = {
+    applicationId: application.id,
+    applicationName: application.name,
+    groupName: userinfo.value?.groupName,
+    providerName: item.name,
+    type: 'bind',
+  };
+
+  const stateJson = JSON.stringify(state);
+  const encodedState = btoa(stateJson)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replaceAll(/=*$/g, '');
+
   if (item.subType === 'OAuth2') {
-    const state = {
-      applicationId: application.id,
-      applicationName: application.name,
-      groupName: userinfo.value?.groupName,
-      providerName: item.name,
-      type: 'bind',
-    };
-
-    const stateJson = JSON.stringify(state);
-    const encodedState = btoa(stateJson)
-      .replaceAll('+', '-')
-      .replaceAll('/', '_')
-      .replaceAll(/=*$/g, '');
-
     const params = new URLSearchParams();
     params.set('client_id', item.clientId);
     params.set('redirect_uri', `${window.location.origin}/auth/callback`);
@@ -54,6 +58,27 @@ const handleBindIdp = (item: any) => {
     params.set('state', encodedState);
 
     window.location.href = `${item.authEndpoint}?${params.toString()}`;
+    return;
+  } else if (item.subType === 'SAML') {
+    const providerItem = application.value.providerItems.find(
+      (p: any) => p.providerId === item.id,
+    );
+
+    const { request, bingding, location } = await getSamlRequestApi({
+      id: item.id,
+      isCompressed: providerItem.rule?.includes('compressed'),
+    });
+
+    const params = new URLSearchParams();
+    params.set('SAMLRequest', request);
+    params.set('RelayState', encodedState);
+
+    if (bingding === 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST') {
+      createPostFormAndSubmit(params, location);
+    }
+
+    window.location.href = `${location}?${params.toString()}`;
+    return;
   }
 
   window.console.log('未实现');
@@ -86,6 +111,10 @@ onMounted(async () => {
         <template #prefix>
           <NAvatar :size="48" :src="item.faviconUrl" />
         </template>
+        {{
+          userThirdPardBindList.find((bind) => bind.providerName === item.name)
+            ?.thirdPartName
+        }}
         <template #suffix>
           <NPopconfirm
             v-if="
