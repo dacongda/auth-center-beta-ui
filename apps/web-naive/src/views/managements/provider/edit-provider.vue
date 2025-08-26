@@ -265,7 +265,18 @@ const getODICConfiguration = () => {
                   v-if="field.name === 'tokenType'"
                   :label="field.label"
                 >
-                  <NInput v-model:value="providerFormValue.value.tokenType" />
+                  <NInput
+                    v-if="providerFormValue.value.subType !== 'OIDC'"
+                    v-model:value="providerFormValue.value.tokenType"
+                  />
+                  <NSelect
+                    v-else
+                    :options="[
+                      { label: 'id_token', value: 'id_token' },
+                      { label: 'code', value: 'code' },
+                    ]"
+                    v-model:value="providerFormValue.value.tokenType"
+                  />
                 </NFormItemGi>
 
                 <NFormItemGi

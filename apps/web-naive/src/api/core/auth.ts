@@ -106,6 +106,13 @@ export async function resetPasswordApi(data: any) {
 }
 
 /**
+ * 获取OAuth Request
+ */
+export async function getOAuthReqestApi(query: any) {
+  return baseRequest2Client.get('/oauth/getOAuthRequest', { params: query });
+}
+
+/**
  * 获取SAML Request
  */
 export async function getSamlRequestApi(query: any) {

@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue';
 
 import { useUserStore } from '@vben/stores';
-import { createPostFormAndSubmit } from '@vben/utils';
 
 import {
   NAvatar,
@@ -17,11 +16,8 @@ import {
 } from 'naive-ui';
 
 import { message } from '#/adapter/naive';
-import {
-  getSamlRequestApi,
-  myThirdPartBindApi,
-  unBindThirdPartApi,
-} from '#/api';
+import { myThirdPartBindApi, unBindThirdPartApi } from '#/api';
+import { handleThirdPartRedirect } from '#/utils';
 
 const userinfo = defineModel<any>('userInfo', { default: {} });
 const dbUserInfo = useUserStore();
@@ -42,46 +38,11 @@ const handleBindIdp = async (item: any) => {
     type: 'bind',
   };
 
-  const stateJson = JSON.stringify(state);
-  const encodedState = btoa(stateJson)
-    .replaceAll('+', '-')
-    .replaceAll('/', '_')
-    .replaceAll(/=*$/g, '');
+  const providerItem = application.providerItems.find(
+    (p: any) => p.providerId === item.id,
+  );
 
-  if (item.subType === 'OAuth2') {
-    const params = new URLSearchParams();
-    params.set('client_id', item.clientId);
-    params.set('redirect_uri', `${window.location.origin}/auth/callback`);
-    if (item.scopes) {
-      params.set('scope', item.scopes);
-    }
-    params.set('state', encodedState);
-
-    window.location.href = `${item.authEndpoint}?${params.toString()}`;
-    return;
-  } else if (item.subType === 'SAML') {
-    const providerItem = application.value.providerItems.find(
-      (p: any) => p.providerId === item.id,
-    );
-
-    const { request, bingding, location } = await getSamlRequestApi({
-      id: item.id,
-      isCompressed: providerItem.rule?.includes('compressed'),
-    });
-
-    const params = new URLSearchParams();
-    params.set('SAMLRequest', request);
-    params.set('RelayState', encodedState);
-
-    if (bingding === 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST') {
-      createPostFormAndSubmit(params, location);
-    }
-
-    window.location.href = `${location}?${params.toString()}`;
-    return;
-  }
-
-  window.console.log('未实现');
+  handleThirdPartRedirect(item, providerItem, state);
 };
 
 const handleUnBindIdp = async (idpItem: any) => {

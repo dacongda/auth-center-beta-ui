@@ -109,7 +109,7 @@ const [BaseForm, { setValues }] = useVbenForm({
         ],
         placeholder: '请选择',
       },
-      defaultValue: 'RSA',
+      defaultValue: 'RS',
       disabled: !!id,
       fieldName: 'cryptoAlgorithm',
       label: '加密算法',
