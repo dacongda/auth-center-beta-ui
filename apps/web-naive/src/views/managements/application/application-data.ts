@@ -112,4 +112,20 @@ export const providerRule: any = {
       multiple: true,
     },
   },
+  SMS: {
+    Tencent: {
+      options: [
+        { label: '默认', value: 'Default' },
+        { label: '注册', value: 'Register' },
+      ],
+      multiple: true,
+    },
+    Twilio: {
+      options: [
+        { label: '默认', value: 'Default' },
+        { label: '注册', value: 'Register' },
+      ],
+      multiple: true,
+    },
+  },
 };

@@ -234,6 +234,21 @@ const accessGroupOptions = computed(() => {
             <NFormItem label="应用名">
               <NInput v-model:value="appFormValue.value.name" />
             </NFormItem>
+            <NFormItem label="显示名">
+              <NInput v-model:value="appFormValue.value.displayName" />
+            </NFormItem>
+            <NFormItem label="缩略图">
+              <NInput v-model:value="appFormValue.value.faviconUrl" />
+            </NFormItem>
+            <NFormItem label="缩略图预览">
+              <img style="height: 50px" :src="appFormValue.value.faviconUrl" />
+            </NFormItem>
+            <NFormItem label="Logo图">
+              <NInput v-model:value="appFormValue.value.logoUrl" />
+            </NFormItem>
+            <NFormItem label="Logo图预览">
+              <img style="height: 50px" :src="appFormValue.value.logoUrl" />
+            </NFormItem>
             <NFormItem label="可用群组">
               <NTreeSelect
                 :options="groupTree"

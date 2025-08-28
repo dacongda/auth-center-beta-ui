@@ -81,7 +81,7 @@ const handleOnResendInner = async () => {
       <PhoneInput
         :size="props.size"
         v-model:value="value"
-        v-if="props.type === 'Phone'"
+        v-if="props.type === 'SMS'"
         class="mt-2"
       />
       <NInput

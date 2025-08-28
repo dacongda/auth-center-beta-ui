@@ -94,14 +94,9 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
             />
           </template>
           <!-- <SloganIcon v-else :alt="appName" class="animate-float h-64 w-2/5" /> -->
-          <img
-            src="/AuthCenterLogo.svg"
-            v-else
-            :alt="appName"
-            class="h-64 w-2/5"
-          />
+          <img :src="logo" v-else :alt="appName" class="h-64 w-2/5" />
           <div class="text-1xl text-foreground mt-6 font-sans lg:text-2xl">
-            {{ pageTitle }}
+            {{ appName }}
           </div>
           <div class="dark:text-muted-foreground mt-2">
             {{ pageDescription }}

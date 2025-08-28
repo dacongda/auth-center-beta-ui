@@ -162,11 +162,15 @@ const hasEmailProvider =
     (el: any) => el.type === 'Email',
   ).length !== 0;
 
+const captchaProvider = dbUserInfo.userInfo?.loginApplication?.providers.find(
+  (el: any) => el.type === 'Captcha',
+);
+
 const resendCode = async (captchaInfo: any, captchaCode: string) => {
   const { mfaEnableId } = await sendVerificationCodeApi({
     destination:
       curModifyItem.value === 'Email' ? safeForm.email : safeForm.phone,
-    authType: curModifyItem.value,
+    authType: curModifyItem.value === 'Phone' ? 'SMS' : curModifyItem.value,
     captchaId: captchaInfo.captchaId,
     captchaCode,
   });
@@ -203,7 +207,7 @@ const mfaItems = [
   },
   {
     label: '短信',
-    value: 'Phone',
+    value: 'SMS',
     infoField: 'enablePhoneMfa',
   },
 ];
@@ -241,11 +245,12 @@ const mfaItems = [
             <NCard class="m-2">
               <SendCode
                 v-if="item.value === 'Phone'"
-                type="Phone"
+                type="SMS"
                 v-model:value="safeForm.phone"
                 v-model:code="safeForm.code"
                 :resend="resendCode"
                 :application-id="userinfo.loginApplication"
+                :captcha-provider="captchaProvider"
                 :disable-code-input="!hasPhoneProvider"
               />
               <SendCode
@@ -255,6 +260,7 @@ const mfaItems = [
                 v-model:value="safeForm.email"
                 v-model:code="safeForm.code"
                 :application-id="userinfo.loginApplication"
+                :captcha-provider="captchaProvider"
                 :resend="resendCode"
               />
               <template v-if="item.value === 'Password'">

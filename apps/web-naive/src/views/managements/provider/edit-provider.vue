@@ -24,6 +24,7 @@ import {
   addProviderApi,
   getProviderApi,
   testSendEmailApi,
+  testSendSMSApi,
   updateProviderApi,
 } from '#/api/core/provider';
 
@@ -84,6 +85,12 @@ const providerFieldList = computed(() => {
 
 const testSendEmail = () => {
   testSendEmailApi(providerFormValue.value).then(() => {
+    message.success('发送成功');
+  });
+};
+
+const testSendSMS = () => {
+  testSendSMSApi(providerFormValue.value).then(() => {
     message.success('发送成功');
   });
 };
@@ -523,6 +530,25 @@ const getODICConfiguration = () => {
                   @click="
                     () => {
                       testSendEmail();
+                    }
+                  "
+                >
+                  发送
+                </NButton>
+              </NFormItemGi>
+              <NFormItemGi
+                :span="2"
+                v-if="providerFormValue.value.type === 'SMS'"
+                label="短信测试"
+              >
+                <NInput
+                  v-model:value="providerFormValue.value.destination"
+                  placeholder="请输入接收者"
+                />
+                <NButton
+                  @click="
+                    () => {
+                      testSendSMS();
                     }
                   "
                 >

@@ -198,7 +198,7 @@ const formSchema = computed((): VbenFormSchema[] => {
       component: 'Sendcode',
       componentProps: {
         placeholder: $t('authentication.mobile') + $t('authentication.code'),
-        type: 'Phone',
+        type: 'SMS',
         applicationId: application.value?.id,
         captchaProvider: captchaProvider.value,
         disableDestination: true,

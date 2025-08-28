@@ -65,10 +65,18 @@ export const goEditProvider = (router: any, row: any) => {
 };
 
 export const providerTypes: any = {
-  Captcha: ['Default', 'Aliyun'],
+  Captcha: [
+    'Default',
+    'Aliyun',
+    'ReCaptchaV2',
+    'HCaptcha',
+    'Cloudflare',
+    'TencentTsec',
+  ],
   Email: ['SMTP'],
   Auth: ['OAuth2', 'OIDC', 'SAML'],
   Storage: ['Local', 'S3'],
+  SMS: ['Tencent', 'Twilio'],
 };
 
 export const providerTypesObject = Object.keys(providerTypes).map((el) => {
@@ -83,6 +91,25 @@ export const providerFieldArray: any = {
       { name: 'clientSecret', label: 'accessKeySecret' },
       { name: 'authEndpoint', label: '身份标' },
       { name: 'sceneId', label: '场景ID' },
+    ],
+    ReCaptchaV2: [
+      { name: 'clientId', label: 'accessKeyId' },
+      { name: 'clientSecret', label: 'accessKeySecret' },
+    ],
+    HCaptcha: [
+      { name: 'clientId', label: 'accessKeyId' },
+      { name: 'clientSecret', label: 'accessKeySecret' },
+    ],
+    Cloudflare: [
+      { name: 'clientId', label: 'accessKeyId' },
+      { name: 'clientSecret', label: 'accessKeySecret' },
+    ],
+    TencentTsec: [
+      { name: 'clientId', label: 'accessKeyId' },
+      { name: 'clientSecret', label: 'accessKeySecret' },
+      { name: 'authEndpoint', label: 'appId' },
+      { name: 'configureUrl', label: 'appSecret' },
+      { name: 'regionId', label: '区域ID' },
     ],
   },
   Auth: {
@@ -135,6 +162,25 @@ export const providerFieldArray: any = {
       { name: 'subject', label: '主题' },
       { name: 'body', label: '验证码内容' },
       { name: 'linkBody', label: '链接内容' },
+    ],
+  },
+  SMS: {
+    Tencent: [
+      { name: 'clientId', label: 'SecretId' },
+      { name: 'clientSecret', label: 'Secretkey' },
+      { name: 'configureUrl', label: 'appId' },
+      { name: 'authEndpoint', label: 'signName' },
+      { name: 'tokenEndpoint', label: '模板Id' },
+      { name: 'regionId', label: '区域ID' },
+      { name: 'sceneId', label: 'senderId(国际)' },
+    ],
+    Twilio: [
+      { name: 'clientId', label: 'Account SID' },
+      { name: 'clientSecret', label: 'Auth Token' },
+      { name: 'authEndpoint', label: '发件人号码' },
+      { name: 'tokenEndpoint', label: '模板Id' },
+      { name: 'regionId', label: '区域ID' },
+      { name: 'sceneId', label: 'edge' },
     ],
   },
   Storage: {

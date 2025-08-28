@@ -65,7 +65,7 @@ const handleResend = async (captchaId: any, captchaCode: any) => {
     <NH1 class="text-center">MFA验证</NH1>
     <NH3 v-if="curType === 'Email'" class="text-center">邮箱</NH3>
     <NH3 v-if="curType === 'TOTP'" class="text-center">TOTP</NH3>
-    <NH3 v-if="curType === 'Phone'" class="text-center">手机</NH3>
+    <NH3 v-if="curType === 'SMS'" class="text-center">手机</NH3>
     <NH3 v-if="curType === 'RecoveryCode'" class="text-center">救援代码</NH3>
 
     <SendCode

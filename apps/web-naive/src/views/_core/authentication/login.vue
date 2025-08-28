@@ -7,10 +7,10 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
+import { updatePreferences } from '@vben/preferences';
 
 import { NButton, NFlex, NTabPane, NTabs } from 'naive-ui';
 
-import { message } from '#/adapter/naive';
 import { getGroupWithApplicationApi } from '#/api/core/group';
 import {
   createAssertionApi,
@@ -120,36 +120,46 @@ const authFunc = async (params: Recordable<any>, jumpCaptcha = false) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   groupName.value = route.params.groupName ?? 'built-in';
 
-  getGroupWithApplicationApi({
+  const res: any = await getGroupWithApplicationApi({
     groupName: groupName.value,
     clientId: route.params?.clientId,
-  })
-    .then(async (res: any) => {
-      if (res?.defaultApplication) {
-        group.value = res;
-        groupName.value = group.value.name;
-        application.value = res.defaultApplication;
-        authStore.loginApplication = res.defaultApplication;
+  });
 
-        captchaProvider.value = application.value?.providers.find(
-          (p: any) => p.type === 'Captcha',
-        );
+  if (res?.defaultApplication) {
+    group.value = res;
+    groupName.value = group.value.name;
+    application.value = res.defaultApplication;
+    authStore.loginApplication = res.defaultApplication;
 
-        authProviers.value = application.value?.providers.filter(
-          (p: any) => p.type === 'Auth',
-        );
+    captchaProvider.value = application.value?.providers.find(
+      (p: any) => p.type === 'Captcha',
+    );
 
-        captchaRef.value = loginRef.value
-          ?.getFormApi()
-          ?.getFieldComponentRef('code');
-      }
-    })
-    .catch(() => {
-      message.error('获取失败');
+    authProviers.value = application.value?.providers.filter(
+      (p: any) => p.type === 'Auth',
+    );
+
+    captchaRef.value = loginRef.value
+      ?.getFormApi()
+      ?.getFieldComponentRef('code');
+
+    updatePreferences({
+      app: {
+        name: res?.defaultApplication.displayName,
+      },
+      logo: {
+        source: res?.defaultApplication.logoUrl,
+      },
     });
+
+    if (res?.defaultApplication.faviconUrl) {
+      const favicon: any = document.querySelector('link[rel="icon"]');
+      favicon.href = res?.defaultApplication.faviconUrl;
+    }
+  }
 });
 
 const preProcessLoginParam = (params: Recordable<any>) => {

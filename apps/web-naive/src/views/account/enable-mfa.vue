@@ -135,8 +135,10 @@ const countRender: CountdownProps['render'] = (props: {
                 />
                 请输入设备中显示的验证码
               </template>
-              <template v-if="mfaType === 'Email'">
-                <p>验证码已发送至您的邮箱</p>
+              <template v-if="mfaType === 'Email' || mfaType === 'SMS'">
+                <p>
+                  验证码已发送至您的{{ mfaType === 'Email' ? '邮箱' : '手机' }}
+                </p>
                 <NButton
                   :disabled="countActive"
                   type="primary"

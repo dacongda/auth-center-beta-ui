@@ -41,3 +41,10 @@ export async function removeProviderApi(params: any) {
 export async function testSendEmailApi(data: any) {
   return baseRequest2Client.post('/provider/testSendEmail', data);
 }
+
+/**
+ * 测试短信提供商
+ */
+export async function testSendSMSApi(data: any) {
+  return baseRequest2Client.post('/provider/testSendSMS', data);
+}
