@@ -1,11 +1,18 @@
 <script setup lang="tsx">
 import type { CountdownProps } from 'naive-ui';
 
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 
-import { NButton, NCountdown, NInput, NInputOtp, NSpace } from 'naive-ui';
+import {
+  NButton,
+  NCountdown,
+  NFlex,
+  NInput,
+  NInputOtp,
+  NSpace,
+} from 'naive-ui';
 
-import { getCaptcha } from '#/api/core/captcha';
+import Captcha from '#/components/captcha.vue';
 import PhoneInput from '#/components/phone-input.vue';
 
 const props = defineProps([
@@ -14,6 +21,8 @@ const props = defineProps([
   'resend',
   'applicationId',
   'disableDestination',
+  'captchaProvider',
+  'size',
 ]);
 
 const code = defineModel<string>('code');
@@ -22,8 +31,10 @@ const value = defineModel<string>('value');
 const duration = ref(0);
 const countActive = ref(true);
 const isLoading = ref(false);
-const captchaInfo: any = ref();
+
+const captchaRef = ref();
 const captchaCode = ref('');
+const captchaId = ref('');
 
 const countRender: CountdownProps['render'] = (props: {
   hours: number;
@@ -34,10 +45,15 @@ const countRender: CountdownProps['render'] = (props: {
   return `(${(props.minutes * 60 + props.seconds).toString().padStart(2, '0')}s)`;
 };
 
-const handleOnResend = async () => {
+const handleOnResend = async (_: any, jumpCaptcha = false) => {
+  if (!jumpCaptcha) {
+    captchaRef.value.showPopupCaptcha(handleOnResendInner, {});
+    return;
+  }
+
   try {
     isLoading.value = true;
-    await props.resend(captchaInfo.value, captchaCode.value);
+    await props.resend(captchaId.value, captchaCode.value, props.type);
 
     duration.value = 60_000;
     countActive.value = true;
@@ -46,63 +62,73 @@ const handleOnResend = async () => {
   }
 };
 
-onMounted(() => {
-  renewCaptcha();
-});
+const handleOnResendInner = async () => {
+  try {
+    isLoading.value = true;
+    await props.resend(captchaId.value, captchaCode.value, props.type);
 
-const renewCaptcha = async () => {
-  captchaInfo.value = await getCaptcha({
-    applicationId: props.applicationId,
-  });
+    duration.value = 60_000;
+    countActive.value = true;
+  } finally {
+    captchaRef.value.refetchCaptcha();
+    isLoading.value = false;
+  }
 };
 </script>
 <template>
-  <NSpace vertical>
+  <NSpace vertical class="w-full">
     <template v-if="!props.disableDestination">
       <PhoneInput
+        :size="props.size"
         v-model:value="value"
         v-if="props.type === 'Phone'"
-        class="m-2"
+        class="mt-2"
       />
       <NInput
         v-if="props.type === 'Email'"
-        class="m-2"
+        class="mt-2"
         v-model:value="value"
         placeholder="请输入"
+        :size="props.size"
       />
     </template>
     <div
       v-if="props.type !== 'TOTP' && props.type !== 'RecoveryCode'"
-      class="relative m-2 flex w-full items-center"
+      class="relative flex w-full items-center"
     >
-      <NInput class="flex" v-model:value="captchaCode" />
-      <div class="ml-2">
-        <img
-          @click="renewCaptcha"
-          :src="`data:image/bmp;base64,${captchaInfo?.captchaImg}`"
-          style="height: 2.5rem"
-        />
-      </div>
+      <Captcha
+        ref="captchaRef"
+        :application-id="props.applicationId"
+        :provider="props.captchaProvider"
+        v-model:value="captchaCode"
+        v-model:captcha-id="captchaId"
+      />
     </div>
 
     <NInput
       v-if="props.type === 'RecoveryCode'"
+      :size="props.size"
       v-model:value="code"
       placeholder="请输入救援代码"
     />
 
-    <NSpace
-      :justify="
-        props.type === 'TOTP' || props.type === 'RecoveryCode'
-          ? 'center'
-          : 'space-around'
-      "
+    <NFlex
       align="center"
+      class="w-100"
+      style="flex-flow: row"
       v-if="!props.disableCodeInput"
     >
+      <NInput
+        v-if="props.type !== 'TOTP'"
+        :size="props.size"
+        v-model:value="code"
+        :placeholder="
+          props.type === 'RecoveryCode' ? '请输入救援代码' : '请输入验证码'
+        "
+      />
       <NInputOtp
-        v-if="props.type !== 'RecoveryCode'"
-        class="m-2"
+        v-if="['TOTP'].includes(props.type)"
+        class="m-2 m-auto"
         @update-value="
           (el) => {
             code = el.join('');
@@ -110,10 +136,11 @@ const renewCaptcha = async () => {
         "
       />
       <NButton
+        :size="props.size"
         v-if="props.type !== 'TOTP' && props.type !== 'RecoveryCode'"
         :disabled="countActive || isLoading"
         :loading="countActive || isLoading"
-        @click="handleOnResend"
+        @click="handleOnResend(false)"
       >
         发送验证码
         <NCountdown
@@ -128,6 +155,6 @@ const renewCaptcha = async () => {
           "
         />
       </NButton>
-    </NSpace>
+    </NFlex>
   </NSpace>
 </template>

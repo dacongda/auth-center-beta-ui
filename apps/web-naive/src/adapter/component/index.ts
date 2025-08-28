@@ -72,6 +72,9 @@ const Sendcode = defineAsyncComponent(() =>
 const PhoneInput = defineAsyncComponent(() =>
   import('#/components/phone-input.vue').then((res) => res.default),
 );
+const Captcha = defineAsyncComponent(() =>
+  import('#/components/captcha.vue').then((res) => res.default),
+);
 const withDefaultPlaceholder = <T extends Component>(
   component: T,
   type: 'input' | 'select',
@@ -110,6 +113,7 @@ const withDefaultPlaceholder = <T extends Component>(
 export type ComponentType =
   | 'ApiSelect'
   | 'ApiTreeSelect'
+  | 'Captcha'
   | 'Checkbox'
   | 'CheckboxGroup'
   | 'DatePicker'
@@ -233,6 +237,13 @@ async function initComponentAdapter() {
     }),
     PhoneInput: withDefaultPlaceholder(PhoneInput, 'input', {
       component: NInput,
+      modelPropName: 'value',
+      inputProps: {
+        placeholder: $t('ui.placeholder.input'),
+      },
+    }),
+    Captcha: withDefaultPlaceholder(Captcha, 'input', {
+      component: Captcha,
       modelPropName: 'value',
       inputProps: {
         placeholder: $t('ui.placeholder.input'),

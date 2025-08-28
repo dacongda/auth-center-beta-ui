@@ -10,7 +10,6 @@ import { $t } from '@vben/locales';
 
 import { message } from '#/adapter/naive';
 import { sendForgetPasswordLink } from '#/api';
-import { getCaptcha } from '#/api/core/captcha';
 import { getGroupWithApplicationApi } from '#/api/core/group';
 import { useAuthStore } from '#/store';
 
@@ -29,7 +28,8 @@ const captchaProvider: any = ref();
 const authProviers = ref<any[]>();
 const emailProvider = ref<any>();
 
-const captchaInfo: any = ref();
+const resetRef = ref();
+const captchaId = ref();
 
 onMounted(() => {
   groupName.value = route.params.groupName ?? 'built-in';
@@ -56,8 +56,6 @@ onMounted(() => {
         authProviers.value = res.defaultApplication?.providers.filter(
           (p: any) => p.type === 'Auth',
         );
-
-        renewCaptcha();
       }
     })
     .catch(() => {
@@ -80,48 +78,45 @@ const formSchema = computed((): VbenFormSchema[] => {
         .email($t('authentication.emailValidErrorTip')),
     },
     {
-      component: 'VbenInput',
+      component: 'Captcha',
       componentProps: {
+        applicationId: application.value?.id,
+        provider: captchaProvider.value,
         placeholder: $t('authentication.code'),
+        'onUpdate:captchaId': (value: any) => {
+          captchaId.value = value;
+        },
       },
       dependencies: {
-        triggerFields: ['destination'],
+        triggerFields: ['name'],
         if: () => {
           return !!captchaProvider.value;
         },
       },
       fieldName: 'captchaCode',
       label: $t('authentication.code'),
-      rules: z.string().min(1, { message: '请输入验证码' }),
-      suffix: () => {
-        return (
-          <img
-            onClick={renewCaptcha}
-            src={`data:image/bmp;base64,${captchaInfo.value?.captchaImg}`}
-            style="height: 2.5rem"
-          />
-        );
-      },
     },
   ];
 });
 
-const renewCaptcha = async () => {
-  captchaInfo.value = await getCaptcha({
-    applicationId: application.value.id,
-  });
-};
-
-function handleSubmit(value: Recordable<any>) {
+function handleSubmit(value: Recordable<any>, jumpCaptcha = false) {
+  const captchaRef = resetRef.value
+    ?.getFormApi()
+    ?.getFieldComponentRef('captchaCode');
+  if (captchaProvider.value && !jumpCaptcha) {
+    captchaRef.showPopupCaptcha(handleSubmit, value);
+    return;
+  }
   loading.value = true;
   value.applicationId = application.value.id;
-  value.captchaId = captchaInfo.value?.captchaId;
+  value.captchaId = captchaId.value;
+  value.captchaCode = value.code;
   sendForgetPasswordLink(value)
     .then(() => {
       message.success('发送成功，请注意查收邮件');
     })
     .catch(() => {
-      renewCaptcha();
+      captchaRef.refetchCaptcha();
     })
     .finally(() => {
       loading.value = false;
@@ -131,7 +126,8 @@ function handleSubmit(value: Recordable<any>) {
 
 <template>
   <AuthenticationForgetPassword
-    :login-path="`/auth/register/${groupName}`"
+    ref="resetRef"
+    :login-path="`/auth/login/${groupName}`"
     :form-schema="formSchema"
     :loading="loading"
     @submit="handleSubmit"

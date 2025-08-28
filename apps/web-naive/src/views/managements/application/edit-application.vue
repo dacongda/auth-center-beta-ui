@@ -157,6 +157,7 @@ const handleProvierItemUpdate = (value: any, index: number) => {
   // window.console.log(provider);
   appFormValue.value.providerItems[index].type = provider?.type;
   appFormValue.value.providerItems[index].providerId = value;
+  appFormValue.value.providerItems[index].rule = [];
 };
 
 const downloadLink = () => {

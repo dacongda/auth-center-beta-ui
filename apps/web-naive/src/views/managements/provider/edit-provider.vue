@@ -480,6 +480,14 @@ const getODICConfiguration = () => {
 
                 <NFormItemGi
                   :span="2"
+                  v-if="field.name === 'sceneId'"
+                  :label="field.label"
+                >
+                  <NInput v-model:value="providerFormValue.value.sceneId" />
+                </NFormItemGi>
+
+                <NFormItemGi
+                  :span="2"
                   v-if="field.name === 'domain'"
                   :label="field.label"
                 >

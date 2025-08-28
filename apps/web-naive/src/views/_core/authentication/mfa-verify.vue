@@ -14,10 +14,15 @@ const mfaVerifyRequest = authStore?.mfaVerifyRequest;
 
 const curType = ref(mfaVerifyRequest?.preferredMfa);
 
-const code = ref([]);
+const code = ref('');
 const verifyCodeId = ref('');
 
+const captchaProvider = ref();
+
 onMounted(() => {
+  captchaProvider.value = authStore.loginApplication.providers.find(
+    (p: any) => p.type === 'Captcha',
+  );
   renewCaptcha();
 });
 
@@ -33,7 +38,10 @@ const handleVerify = () => {
 
 const captchaInfo: any = ref();
 const renewCaptcha = async () => {
-  if (curType.value === 'TOTP') {
+  if (
+    curType.value === 'TOTP' ||
+    captchaProvider.value?.subType !== 'Default'
+  ) {
     return;
   }
   captchaInfo.value = await getCaptcha({
@@ -41,11 +49,11 @@ const renewCaptcha = async () => {
   });
 };
 
-const handleResend = async (captchaInfo: any, captchaCode: any) => {
+const handleResend = async (captchaId: any, captchaCode: any) => {
   const { mfaEnableId } = await sendVerificationCodeApi({
     authType: curType.value,
     verifyId: authStore.paramsCache.captchaId,
-    captchaId: captchaInfo.captchaId,
+    captchaId,
     captchaCode,
   });
 
@@ -61,6 +69,7 @@ const handleResend = async (captchaInfo: any, captchaCode: any) => {
     <NH3 v-if="curType === 'RecoveryCode'" class="text-center">救援代码</NH3>
 
     <SendCode
+      :captcha-provider="captchaProvider"
       :disable-destination="true"
       v-model:code="code"
       :type="curType"

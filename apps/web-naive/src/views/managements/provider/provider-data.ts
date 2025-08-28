@@ -81,7 +81,8 @@ export const providerFieldArray: any = {
     Aliyun: [
       { name: 'clientId', label: 'accessKeyId' },
       { name: 'clientSecret', label: 'accessKeySecret' },
-      { name: 'configureUrl', label: '场景ID' },
+      { name: 'authEndpoint', label: '身份标' },
+      { name: 'sceneId', label: '场景ID' },
     ],
   },
   Auth: {

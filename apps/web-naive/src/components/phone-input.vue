@@ -5,8 +5,8 @@ import { NInput, NInputGroup, NSelect } from 'naive-ui';
 
 import { countryRegionList } from './country-code';
 
+const { size } = defineProps(['size']);
 const value = defineModel<string>('value');
-
 const countryRegionOption = countryRegionList.map((el) => {
   return {
     name: `+${el.tel} (${el.short_upper})`,
@@ -30,7 +30,12 @@ const handleTelUpdate = () => {
       filterable
       style="width: 200px"
       @update:value="handleTelUpdate"
+      :size="size"
     />
-    <NInput v-model:value="telNumber" @update:value="handleTelUpdate" />
+    <NInput
+      :size="size"
+      v-model:value="telNumber"
+      @update:value="handleTelUpdate"
+    />
   </NInputGroup>
 </template>

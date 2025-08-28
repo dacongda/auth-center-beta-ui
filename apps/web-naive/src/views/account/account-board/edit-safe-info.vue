@@ -273,7 +273,7 @@ const mfaItems = [
                   v-model:value="safeForm.confirmNewPassword"
                 />
               </template>
-              <NSpace justify="end">
+              <NSpace justify="end" class="mt-4">
                 <NButton
                   secondary
                   type="primary"

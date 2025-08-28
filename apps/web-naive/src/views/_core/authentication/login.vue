@@ -11,7 +11,6 @@ import { $t } from '@vben/locales';
 import { NButton, NFlex, NTabPane, NTabs } from 'naive-ui';
 
 import { message } from '#/adapter/naive';
-import { getCaptcha } from '#/api/core/captcha';
 import { getGroupWithApplicationApi } from '#/api/core/group';
 import {
   createAssertionApi,
@@ -35,11 +34,18 @@ const application: any = ref();
 const captchaProvider: any = ref();
 const authProviers = ref<any[]>();
 
-const captchaInfo: any = ref();
+const captchaRef = ref();
+const captchaId = ref();
 
 const loginMethod = ref<string>('Password');
+const loginRef = ref();
 
-const authFunc = async (params: Recordable<any>) => {
+const authFunc = async (params: Recordable<any>, jumpCaptcha = false) => {
+  captchaRef.value = loginRef.value?.getFormApi()?.getFieldComponentRef('code');
+  if (captchaProvider.value && !jumpCaptcha) {
+    captchaRef.value.showPopupCaptcha(authFunc, params);
+    return;
+  }
   params = preProcessLoginParam(params);
 
   authStore.loginLoading = true;
@@ -110,12 +116,11 @@ const authFunc = async (params: Recordable<any>) => {
       router.push({ name: 'MfaVerify' });
     }
   } catch {
-    renewCaptcha();
+    captchaRef.value.refetchCaptcha();
   }
 };
 
 onMounted(() => {
-  window.console.log(route.params);
   groupName.value = route.params.groupName ?? 'built-in';
 
   getGroupWithApplicationApi({
@@ -137,7 +142,9 @@ onMounted(() => {
           (p: any) => p.type === 'Auth',
         );
 
-        renewCaptcha();
+        captchaRef.value = loginRef.value
+          ?.getFormApi()
+          ?.getFieldComponentRef('code');
       }
     })
     .catch(() => {
@@ -145,20 +152,9 @@ onMounted(() => {
     });
 });
 
-const renewCaptcha = async () => {
-  if (!captchaProvider.value) {
-    return;
-  }
-  captchaInfo.value = await getCaptcha({
-    applicationId: application.value.id,
-  });
-};
-
 const preProcessLoginParam = (params: Recordable<any>) => {
   params.groupName = groupName.value;
-  if (captchaInfo.value) {
-    params.captchaId = captchaInfo.value.captchaId;
-  }
+  params.captchaId = captchaId.value;
   params.loginMethod = loginMethod.value;
   return params;
 };
@@ -191,9 +187,14 @@ const formSchema = computed((): VbenFormSchema[] => {
       rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
     },
     {
-      component: 'VbenInput',
+      component: 'Captcha',
       componentProps: {
+        applicationId: application.value?.id,
+        provider: captchaProvider.value,
         placeholder: $t('authentication.code'),
+        'onUpdate:captchaId': (value: any) => {
+          captchaId.value = value;
+        },
       },
       dependencies: {
         triggerFields: ['name'],
@@ -203,16 +204,6 @@ const formSchema = computed((): VbenFormSchema[] => {
       },
       fieldName: 'code',
       label: $t('authentication.code'),
-      rules: z.string().min(1, { message: '请输入验证码' }),
-      suffix: () => {
-        return (
-          <img
-            onClick={renewCaptcha}
-            src={`data:image/bmp;base64,${captchaInfo.value?.captchaImg}`}
-            style="height: 2.5rem"
-          />
-        );
-      },
     },
   ];
 
@@ -258,6 +249,7 @@ const handleLoginToThirdPart = async (item: any) => {
 <template>
   <div>
     <AuthenticationLogin
+      ref="loginRef"
       :register-path="`/auth/register/${groupName}`"
       :form-schema="formSchema"
       :loading="authStore.loginLoading"
