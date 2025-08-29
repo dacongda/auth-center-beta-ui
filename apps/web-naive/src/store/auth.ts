@@ -15,6 +15,7 @@ import { defineStore } from 'pinia';
 import { notification } from '#/adapter/naive';
 import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
 import { $t } from '#/locales';
+import { updateAppTheme } from '#/utils';
 
 export const useAuthStore = defineStore(
   'auth',
@@ -195,10 +196,15 @@ export const useAuthStore = defineStore(
       });
     }
 
-    async function fetchUserInfo() {
+    async function fetchUserInfo(update = false) {
       let userInfo: null | UserInfo = null;
       userInfo = await getUserInfoApi();
       userStore.setUserInfo(userInfo);
+
+      if (update) {
+        updateAppTheme(userInfo.loginApplication);
+      }
+
       return userInfo;
     }
 

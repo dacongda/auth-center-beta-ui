@@ -2,16 +2,47 @@ import type { VxeGridProps } from '@vben/plugins/vxe-table';
 
 import { getApplicationsApi } from '#/api/core/application';
 
+export interface Application {
+  id: null | number | string;
+  name: string;
+  displayName?: string;
+  faviconUrl?: string;
+  logoUrl?: string;
+  clientId?: string;
+  clientSecret?: string;
+  groupIds?: Array<number>;
+  redirectUrls?: Array<string>;
+  scopes?: Array<string>;
+  expiredSecond?: number;
+  accessExpiredSecond?: number;
+  certId?: null | number;
+  samlAudiences?: Array<string>;
+  samlRedirects?: any;
+  samlAttributes?: any;
+  samlResponseCompress?: boolean;
+  samlEncrypt?: boolean;
+  providerItems: Array<any>;
+  theme: {
+    primaryColor: string;
+    radius: string;
+  };
+}
+
+export interface ApplicationForm {
+  value: Application;
+}
+
 export const applicationGridOptions: VxeGridProps = {
   checkboxConfig: {
     highlight: true,
     labelField: 'name',
   },
   columns: [
-    { title: '序号', type: 'seq', width: 50 },
+    // { title: '序号', type: 'seq', width: 50 },
     // { align: 'left', title: 'Name', type: 'checkbox', width: 100 },
     { field: 'id', sortable: false, title: 'Id', width: 80 },
     { field: 'name', sortable: false, title: 'Name' },
+    { field: 'displayName', sortable: false, title: '显示名' },
     { field: 'clientId', sortable: false, title: 'Client ID' },
     {
       field: 'action',

@@ -1,15 +1,15 @@
+import { updatePreferences } from '@vben/preferences';
 import { createPostFormAndSubmit } from '@vben/utils';
 
 import { getOAuthReqestApi, getSamlRequestApi } from '#/api';
 import { useAuthStore } from '#/store';
-
-const authStore = useAuthStore();
 
 export async function handleThirdPartRedirect(
   provider: any,
   providerItem: any,
   state: any,
 ) {
+  const authStore = useAuthStore();
   authStore.callbackState = state;
   if (provider.subType === 'OAuth2' || provider.subType === 'OIDC') {
     const { redirectUrl, tempId } = await getOAuthReqestApi({
@@ -41,4 +41,24 @@ export async function handleThirdPartRedirect(
   }
 
   window.console.log('未实现');
+}
+
+export function updateAppTheme(application: any) {
+  updatePreferences({
+    app: {
+      name: application.displayName,
+    },
+    logo: {
+      source: application.logoUrl,
+    },
+    theme: {
+      colorPrimary: application.theme.primaryColor.replaceAll(', ', ' '),
+      radius: application.theme.radius,
+    },
+  });
+
+  if (application.faviconUrl) {
+    const favicon: any = document.querySelector('link[rel="icon"]');
+    favicon.href = application.faviconUrl;
+  }
 }

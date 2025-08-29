@@ -7,7 +7,6 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
-import { updatePreferences } from '@vben/preferences';
 
 import { NButton, NFlex, NTabPane, NTabs } from 'naive-ui';
 
@@ -17,7 +16,7 @@ import {
   getAssertionOptionsApi,
 } from '#/api/core/webAuthn';
 import { useAuthStore } from '#/store';
-import { handleThirdPartRedirect } from '#/utils';
+import { handleThirdPartRedirect, updateAppTheme } from '#/utils';
 import { coerceToArrayBuffer, coerceToBase64Url } from '#/views/utils/webAuthn';
 
 defineOptions({ name: 'Login' });
@@ -146,19 +145,7 @@ onMounted(async () => {
       ?.getFormApi()
       ?.getFieldComponentRef('code');
 
-    updatePreferences({
-      app: {
-        name: res?.defaultApplication.displayName,
-      },
-      logo: {
-        source: res?.defaultApplication.logoUrl,
-      },
-    });
-
-    if (res?.defaultApplication.faviconUrl) {
-      const favicon: any = document.querySelector('link[rel="icon"]');
-      favicon.href = res?.defaultApplication.faviconUrl;
-    }
+    updateAppTheme(application.value);
   }
 });
 

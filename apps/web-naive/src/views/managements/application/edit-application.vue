@@ -1,6 +1,8 @@
 <script lang="tsx" setup>
 import type { SelectOption } from 'naive-ui';
 
+import type { Application, ApplicationForm } from './application-data';
+
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -9,10 +11,13 @@ import {
   MaterialSymbolsContentCopy,
   MaterialSymbolsDownload,
 } from '@vben/icons';
+import { preferencesManager } from '@vben/preferences';
 
 import {
   NButton,
   NCard,
+  NColorPicker,
+  NConfigProvider,
   NDynamicInput,
   NForm,
   NFormItem,
@@ -23,6 +28,7 @@ import {
   NInputNumber,
   NPopconfirm,
   NSelect,
+  NSlider,
   NSpace,
   NSwitch,
   NTag,
@@ -40,6 +46,7 @@ import { getGroupTreeApi } from '#/api/core/group';
 import { getProvidersApi } from '#/api/core/provider';
 
 import { providerRule } from './application-data';
+import SiderBar from './icon/sider-bar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -51,7 +58,9 @@ const groupTree = ref<any>([]);
 
 const samlLinkGroupId = ref<any>(null);
 
-const appFormValue: any = reactive({
+const preference = preferencesManager.getPreferences();
+
+const appFormValue = reactive<ApplicationForm>({
   value: {
     id: null,
     name: '',
@@ -62,13 +71,23 @@ const appFormValue: any = reactive({
     expiredSecond: 168 * 3600,
     certId: null,
     providerItems: [],
+    theme: {
+      primaryColor: preference.theme.colorPrimary.replaceAll(' ', ', '),
+      radius: preference.theme.radius,
+    },
   },
 });
 const valJsonStr = ref('');
 
 onMounted(async () => {
   if (id) {
-    getApplicationApi({ id }).then((res) => {
+    getApplicationApi({ id }).then((res: Application) => {
+      if (!res.theme) {
+        res.theme = {
+          primaryColor: preference.theme.colorPrimary.replaceAll(' ', ', '),
+          radius: preference.theme.radius,
+        };
+      }
       appFormValue.value = res;
       valJsonStr.value = JSON.stringify(res);
     });
@@ -97,7 +116,7 @@ onMounted(async () => {
 
 const onSubmit = () => {
   if (id) {
-    appFormValue.value.id = id;
+    appFormValue.value.id = id.toString();
     updateApplicationApi(appFormValue.value).then(() =>
       message.success('成功'),
     );
@@ -126,12 +145,14 @@ const handelCopy = (field: string) => {
     }
     navigator.clipboard.writeText(val);
   } else {
-    navigator.clipboard.writeText(appFormValue.value[field] || '');
+    navigator.clipboard.writeText(
+      appFormValue.value[field as keyof Application] || '',
+    );
   }
   message.success(`${field} 已复制到剪贴板`);
 };
 
-const handleRegenerate = (field: string) => {
+const handleRegenerate = (field: keyof Application) => {
   appFormValue.value[field] = crypto.randomUUID().replaceAll('-', '');
 };
 
@@ -205,7 +226,7 @@ const providerListOptions = computed(() => {
       label: el.name,
       value: el.id,
       type: el.type,
-      disabled: appFormValue.value.providerItems.find(
+      disabled: appFormValue.value.providerItems?.find(
         (pitem: any) => el.id === pitem.providerId,
       ),
     };
@@ -495,6 +516,39 @@ const accessGroupOptions = computed(() => {
                   />
                 </template>
               </NDynamicInput>
+            </NFormItem>
+            <NFormItem label="主题色">
+              <NColorPicker
+                style="width: 200px"
+                v-model:value="appFormValue.value.theme.primaryColor"
+                :show-alpha="false"
+                :modes="['hsl']"
+              />
+            </NFormItem>
+            <NFormItem label="圆角尺寸">
+              <NSlider
+                :value="parseFloat(appFormValue.value.theme.radius) * 100"
+                :format-tooltip="(value: number) => `${value / 100} rem`"
+                @update:value="
+                  (val) => {
+                    appFormValue.value.theme.radius = (val / 100).toString();
+                  }
+                "
+                :step="10"
+              />
+            </NFormItem>
+            <NFormItem label="应用主题预览">
+              <NConfigProvider
+                :theme-overrides="{
+                  common: {
+                    primaryColor: appFormValue.value.theme.primaryColor,
+                    borderRadius: `${appFormValue.value.theme.radius}rem`,
+                  },
+                }"
+              >
+                <SiderBar :color="appFormValue.value.theme.primaryColor" />
+                <NButton class="mt-2" type="primary"> 按钮预览 </NButton>
+              </NConfigProvider>
             </NFormItem>
             <NFormItem label=" ">
               <NSpace class="w-full" reverse>
