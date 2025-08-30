@@ -1,4 +1,4 @@
-import { updatePreferences } from '@vben/preferences';
+import { preferences, updatePreferences } from '@vben/preferences';
 import { createPostFormAndSubmit } from '@vben/utils';
 
 import { getOAuthReqestApi, getSamlRequestApi } from '#/api';
@@ -44,12 +44,19 @@ export async function handleThirdPartRedirect(
 }
 
 export function updateAppTheme(application: any) {
+  let logo = application.logoUrl;
+  if (preferences.theme.mode === 'dark') {
+    logo = application.logoDarkUrl;
+  }
   updatePreferences({
     app: {
       name: application.displayName,
     },
     logo: {
-      source: application.logoUrl,
+      source: logo,
+      favicon: application.faviconUrl,
+      sourceLight: application.logoUrl,
+      sourceDark: application.logoDarkUrl,
     },
     theme: {
       colorPrimary: application.theme.primaryColor.replaceAll(', ', ' '),

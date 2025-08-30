@@ -38,13 +38,9 @@ const onModalShowed = ref();
 const showPopupCaptcha = (func: Function, params: any) => {
   switch (provider.subType) {
     case 'Aliyun': {
-      if (captchaInstance.value) {
+      recreateCaptchaInstance().then(() => {
         captchaInstance.value?.show();
-      } else {
-        recreateCaptchaInstance().then(() => {
-          captchaInstance.value?.show();
-        });
-      }
+      });
 
       break;
     }
@@ -293,3 +289,21 @@ onMounted(() => {
     </NModal>
   </div>
 </template>
+<style>
+/* stylelint-disable-next-line selector-id-pattern */
+#aliyunCaptcha-window-popup {
+  background-color: hsl(var(--background)) !important;
+}
+/* stylelint-disable-next-line selector-id-pattern */
+#aliyunCaptcha-sliding-text-box {
+  background-color: hsl(var(--background-deep)) !important;
+}
+/* stylelint-disable-next-line selector-id-pattern */
+#aliyunCaptcha-sliding-slider {
+  background-color: hsl(var(--primary)) !important;
+}
+/* stylelint-disable-next-line selector-id-pattern */
+#aliyunCaptcha-sliding-text {
+  color: var(--n-tab-text-color) !important;
+}
+</style>

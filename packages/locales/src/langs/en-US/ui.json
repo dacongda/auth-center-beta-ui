@@ -25,20 +25,7 @@
     "sliderRotateFailTip": "Validation failed",
     "sliderRotateSuccessTip": "Validation successful, time {0} seconds",
     "sliderTranslateFailTip": "Validation failed",
-    "sliderTranslateSuccessTip": "Validation successful, time {0} seconds",
-    "refreshAriaLabel": "Refresh captcha",
-    "confirmAriaLabel": "Confirm selection",
-    "confirm": "Confirm",
-    "pointAriaLabel": "Click point",
-    "clickInOrder": "Please click in order"
-  },
-  "iconPicker": {
-    "placeholder": "Select an icon",
-    "search": "Search icon..."
-  },
-  "jsonViewer": {
-    "copy": "Copy",
-    "copied": "Copied"
+    "sliderTranslateSuccessTip": "Validation successful, time {0} seconds"
   },
   "fallback": {
     "comingSoon": "Coming Soon",
@@ -51,6 +38,7 @@
       "networkError": "A network error occurred. Please check your internet connection and try again.",
       "notFound": "Not Found. The requested resource could not be found.",
       "requestTimeout": "The request timed out. Please try again later.",
+      "requestTooMany": "Request too many times, Please Try again later",
       "unauthorized": "Unauthorized. Please log in to continue."
     },
     "internalError": "Oops! Something Went Wrong",

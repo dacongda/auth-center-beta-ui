@@ -8,12 +8,14 @@ import { $t } from '#/locales';
 
 const appName = computed(() => preferences.app.name);
 const logo = computed(() => preferences.logo.source);
+const favicon = computed(() => preferences.logo.favicon);
 </script>
 
 <template>
   <AuthPageLayout
     :app-name="appName"
     :logo="logo"
+    :favicon="favicon"
     :page-description="$t('authentication.pageDesc')"
     :page-title="$t('authentication.pageTitle')"
   >

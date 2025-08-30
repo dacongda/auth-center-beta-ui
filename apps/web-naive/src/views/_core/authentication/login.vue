@@ -7,9 +7,11 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
+import { preferences } from '@vben/preferences';
 
-import { NButton, NFlex, NTabPane, NTabs } from 'naive-ui';
+import { NButton, NFlex, NImage, NTabPane, NTabs } from 'naive-ui';
 
+import { sendVerificationCodeApi } from '#/api';
 import { getGroupWithApplicationApi } from '#/api/core/group';
 import {
   createAssertionApi,
@@ -38,6 +40,7 @@ const captchaId = ref();
 
 const loginMethod = ref<string>('Password');
 const loginRef = ref();
+const verifyId = ref();
 
 const authFunc = async (params: Recordable<any>, jumpCaptcha = false) => {
   captchaRef.value = loginRef.value?.getFormApi()?.getFieldComponentRef('code');
@@ -153,15 +156,20 @@ const preProcessLoginParam = (params: Recordable<any>) => {
   params.groupName = groupName.value;
   params.captchaId = captchaId.value;
   params.loginMethod = loginMethod.value;
+  params.verifyId = verifyId.value;
   return params;
 };
 
 const formSchema = computed((): VbenFormSchema[] => {
   const loginFormSchemas: VbenFormSchema[] = [
     {
-      component: 'VbenInput',
+      component: 'Input',
       componentProps: {
-        placeholder: $t('authentication.usernameTip'),
+        placeholder:
+          loginMethod.value === 'Code'
+            ? '请输入邮箱/手机号'
+            : $t('authentication.usernameTip'),
+        size: 'large',
       },
       fieldName: 'name',
       label: $t('authentication.username'),
@@ -171,9 +179,12 @@ const formSchema = computed((): VbenFormSchema[] => {
           : undefined,
     },
     {
-      component: 'VbenInputPassword',
+      component: 'Input',
       componentProps: {
         placeholder: $t('authentication.password'),
+        showPasswordOn: 'mousedown',
+        type: 'password',
+        size: 'large',
       },
       dependencies: {
         triggerFields: ['loginMethod'],
@@ -182,6 +193,26 @@ const formSchema = computed((): VbenFormSchema[] => {
       fieldName: 'password',
       label: $t('authentication.password'),
       rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
+    },
+    {
+      component: 'Sendcode',
+      componentProps: {
+        placeholder: $t('authentication.code'),
+        type: 'Email',
+        applicationId: application.value?.id,
+        captchaProvider: captchaProvider.value,
+        disableDestination: true,
+        resend: handleOnResend,
+        size: 'large',
+      },
+      dependencies: {
+        triggerFields: ['loginMethod'],
+        show: loginMethod.value === 'Code',
+      },
+      modelPropName: 'code',
+      fieldName: 'password',
+      label: $t('authentication.code'),
+      rules: z.string().min(1, { message: $t('authentication.codeTip', [6]) }),
     },
     {
       component: 'Captcha',
@@ -217,6 +248,21 @@ const getLoginType = () => {
   }
 };
 
+const handleOnResend = async (captchaId: any, captchaCode: any, type: any) => {
+  const vals = await loginRef.value.getFormApi()?.getValues();
+  const dest = vals.name as string;
+  type = dest.includes('@') ? 'Email' : 'SMS';
+  const { mfaEnableId } = await sendVerificationCodeApi({
+    authType: type,
+    applicationId: application.value.id,
+    captchaId,
+    captchaCode,
+    destination: vals.name,
+  });
+
+  verifyId.value = mfaEnableId;
+};
+
 const handleLoginToThirdPart = async (item: any) => {
   const searchParams = new URLSearchParams(window.location.search);
   if (route.name === 'SAMLLogin') {
@@ -245,6 +291,11 @@ const handleLoginToThirdPart = async (item: any) => {
 
 <template>
   <div>
+    <NImage
+      class="mb-2 w-full"
+      style="justify-content: center; height: 5rem"
+      :src="preferences.logo.source"
+    />
     <AuthenticationLogin
       ref="loginRef"
       :register-path="`/auth/register/${groupName}`"
@@ -259,7 +310,8 @@ const handleLoginToThirdPart = async (item: any) => {
           justify-content="space-evenly"
           type="line"
         >
-          <NTabPane name="Password" tab="密码登陆" />
+          <NTabPane name="Password" tab="密码" />
+          <NTabPane name="Code" tab="验证码" />
           <NTabPane name="Passkey" tab="Passkey" />
         </NTabs>
       </template>

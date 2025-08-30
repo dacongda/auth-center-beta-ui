@@ -14,6 +14,9 @@ export const overridesPreferences = defineOverridesPreferences({
   tabbar: {
     enable: false,
   },
+  theme: {
+    mode: 'light',
+  },
   transition: {
     name: 'fade',
   },

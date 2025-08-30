@@ -202,8 +202,12 @@ class PreferenceManager {
         if (this.state.theme.mode === 'auto') {
           this.updatePreferences({
             theme: { mode: isDark ? 'dark' : 'light' },
+            logo: {
+              source: isDark
+                ? (this.state.logo.sourceDark ?? this.state.logo.sourceLight)
+                : this.state.logo.sourceLight,
+            },
           });
-          // 恢复为auto模式
           this.updatePreferences({
             theme: { mode: 'auto' },
           });

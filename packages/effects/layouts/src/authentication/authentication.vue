@@ -10,6 +10,7 @@ import Toolbar from './toolbar.vue';
 interface Props {
   appName?: string;
   logo?: string;
+  favicon?: string;
   pageTitle?: string;
   pageDescription?: string;
   sloganImage?: string;
@@ -23,6 +24,7 @@ withDefaults(defineProps<Props>(), {
   appName: '',
   copyright: false,
   logo: '',
+  favicon: '',
   pageDescription: '',
   pageTitle: '',
   sloganImage: '',
@@ -71,7 +73,13 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
         <div
           class="text-foreground lg:text-foreground ml-4 mt-4 flex flex-1 items-center sm:left-6 sm:top-6"
         >
-          <img v-if="logo" :alt="appName" :src="logo" class="mr-2" width="42" />
+          <img
+            v-if="favicon"
+            :alt="appName"
+            :src="favicon"
+            class="mr-2"
+            width="42"
+          />
           <p v-if="appName" class="m-0 text-xl font-medium">
             {{ appName }}
           </p>
@@ -94,7 +102,7 @@ const { authPanelCenter, authPanelLeft, authPanelRight, isDark } =
             />
           </template>
           <!-- <SloganIcon v-else :alt="appName" class="animate-float h-64 w-2/5" /> -->
-          <img :src="logo" v-else :alt="appName" class="h-64 w-2/5" />
+          <img :src="favicon" v-else :alt="appName" class="h-32 w-2/5" />
           <div class="text-1xl text-foreground mt-6 font-sans lg:text-2xl">
             {{ appName }}
           </div>

@@ -28,6 +28,11 @@ withDefaults(defineProps<{ shouldOnHover?: boolean }>(), {
 function handleChange(isDark: boolean | undefined) {
   updatePreferences({
     theme: { mode: isDark ? 'dark' : 'light' },
+    logo: {
+      source: isDark
+        ? (preferences.logo.sourceDark ?? preferences.logo.sourceLight)
+        : preferences.logo.sourceLight,
+    },
   });
 }
 

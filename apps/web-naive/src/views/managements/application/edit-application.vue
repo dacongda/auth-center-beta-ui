@@ -64,11 +64,17 @@ const appFormValue = reactive<ApplicationForm>({
   value: {
     id: null,
     name: '',
+    logoUrl: '/AuthCenterWideLogo.svg',
+    logoDarkUrl: '/AuthCenterWideDarkLogo.svg',
+    faviconUrl: '/AuthCenterWideLogo.svg',
     clientId: '',
     clientSecret: '',
+    failLoginLimit: 5,
+    failLoginForzenMinute: 15,
     redirectUrls: [],
     scopes: [],
     expiredSecond: 168 * 3600,
+    accessExpiredSecond: 300,
     certId: null,
     providerItems: [],
     theme: {
@@ -270,6 +276,12 @@ const accessGroupOptions = computed(() => {
             <NFormItem label="Logo图预览">
               <img style="height: 50px" :src="appFormValue.value.logoUrl" />
             </NFormItem>
+            <NFormItem label="深色Logo图">
+              <NInput v-model:value="appFormValue.value.logoDarkUrl" />
+            </NFormItem>
+            <NFormItem label="深色Logo图预览">
+              <img style="height: 50px" :src="appFormValue.value.logoDarkUrl" />
+            </NFormItem>
             <NFormItem label="可用群组">
               <NTreeSelect
                 :options="groupTree"
@@ -311,6 +323,18 @@ const accessGroupOptions = computed(() => {
                   是否重置Client Secret
                 </NPopconfirm>
               </NInputGroup>
+            </NFormItem>
+            <NFormItem label="登陆错误次数限制">
+              <NInputNumber v-model:value="appFormValue.value.failLoginLimit">
+                <template #suffix> 次 </template>
+              </NInputNumber>
+            </NFormItem>
+            <NFormItem label="登陆重试等待">
+              <NInputNumber
+                v-model:value="appFormValue.value.failLoginForzenMinute"
+              >
+                <template #suffix> 分钟 </template>
+              </NInputNumber>
             </NFormItem>
             <NFormItem label="重定向地址">
               <NDynamicInput v-model:value="appFormValue.value.redirectUrls" />

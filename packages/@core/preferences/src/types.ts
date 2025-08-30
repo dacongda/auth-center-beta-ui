@@ -134,10 +134,16 @@ interface HeaderPreferences {
 interface LogoPreferences {
   /** logo是否可见 */
   enable: boolean;
+  /** 一比一图 */
+  favicon?: string;
   /** logo图片适应方式 */
   fit: 'contain' | 'cover' | 'fill' | 'none' | 'scale-down';
   /** logo地址 */
   source: string;
+  /** 暗色logo地址 */
+  sourceDark?: string;
+  /** 亮色logo地址 */
+  sourceLight?: string;
 }
 
 interface NavigationPreferences {

@@ -28,9 +28,14 @@ const tokenLocale = computed(() =>
 const tokenDateLocale = computed(() =>
   preferences.app.locale === 'zh-CN' ? dateZhCN : dateEnUS,
 );
-const tokenTheme = computed(() =>
-  preferences.theme.mode === 'dark' ? darkTheme : lightTheme,
-);
+const tokenTheme = computed(() => {
+  if (preferences.theme.mode === 'auto') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? darkTheme
+      : lightTheme;
+  }
+  return preferences.theme.mode === 'dark' ? darkTheme : lightTheme;
+});
 
 const themeOverrides = computed((): GlobalThemeOverrides => {
   return {

@@ -8,9 +8,12 @@ export interface Application {
   displayName?: string;
   faviconUrl?: string;
   logoUrl?: string;
+  logoDarkUrl?: string;
   clientId?: string;
   clientSecret?: string;
   groupIds?: Array<number>;
+  failLoginLimit?: number;
+  failLoginForzenMinute?: number;
   redirectUrls?: Array<string>;
   scopes?: Array<string>;
   expiredSecond?: number;

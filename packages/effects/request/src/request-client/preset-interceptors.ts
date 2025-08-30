@@ -154,6 +154,10 @@ export const errorMessageResponseInterceptor = (
           errorMessage = $t('ui.fallback.http.requestTimeout');
           break;
         }
+        case 429: {
+          errorMessage = $t('ui.fallback.http.requestTooMany');
+          break;
+        }
         default: {
           errorMessage = $t('ui.fallback.http.internalServerError');
         }
