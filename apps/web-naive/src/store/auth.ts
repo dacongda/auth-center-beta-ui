@@ -54,7 +54,7 @@ export const useAuthStore = defineStore(
         params.set('state', oAuthParms.state);
       }
 
-      if (!loginApplication.value?.enableAuthorizeConfirm) {
+      if (loginApplication.value?.enableAuthorizeConfirm) {
         confirmCallback.value = (success: any) => {
           if (!success) {
             params = new URLSearchParams();
@@ -72,8 +72,6 @@ export const useAuthStore = defineStore(
             window.location.href = `${oAuthParms.redirect_uri}?${params.toString()}`;
           }
         };
-
-        window.console.log(oAuthParms);
 
         router.push({
           name: 'AuthConfirm',
