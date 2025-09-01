@@ -77,6 +77,10 @@ export const useAuthStore = defineStore(
       }
     }
 
+    async function handleCasLogin(res: any, oAuthParms: any) {
+      window.location.href = `${oAuthParms.service}?ticket=${res.st}`;
+    }
+
     /**
      * 异步处理登录操作
      * Asynchronously handle the login process
@@ -111,14 +115,6 @@ export const useAuthStore = defineStore(
           return res;
         }
 
-        if (params.type === 'oauth') {
-          handleOAuthLogin(res, oAuthParms);
-          return null;
-        } else if (params.type === 'saml') {
-          handleSamlLogin(res, oAuthParms);
-          return null;
-        }
-
         // 如果成功获取到 accessToken
         if (accessToken) {
           // 将 accessToken 存储到 accessStore 中
@@ -137,7 +133,7 @@ export const useAuthStore = defineStore(
 
           if (accessStore.loginExpired) {
             accessStore.setLoginExpired(false);
-          } else {
+          } else if (params.type === 'login') {
             onSuccess
               ? await onSuccess?.()
               : await router.push(
@@ -159,12 +155,27 @@ export const useAuthStore = defineStore(
             });
           }
 
-          if (userInfo?.realName) {
+          if (params.type === 'login' && userInfo?.realName) {
             notification.success({
               content: $t('authentication.loginSuccess'),
               description: `${$t('authentication.loginSuccessDesc')}:${userInfo?.realName}`,
               duration: 3000,
             });
+          }
+        }
+
+        switch (params.type) {
+          case 'cas': {
+            handleCasLogin(res, oAuthParms);
+            return null;
+          }
+          case 'oauth': {
+            handleOAuthLogin(res, oAuthParms);
+            return null;
+          }
+          case 'saml': {
+            handleSamlLogin(res, oAuthParms);
+            return null;
           }
         }
       } finally {

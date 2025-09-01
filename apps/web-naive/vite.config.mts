@@ -5,11 +5,10 @@ export default defineConfig(async () => {
     application: {},
     vite: {
       server: {
-        allowedHosts: ['test.puiying.cn'],
+        allowedHosts: ['test.puiying.cn', 'host.docker.internal'],
         proxy: {
           '/.well-known': {
             changeOrigin: true,
-            // rewrite: (path) => path.replace(/^\/rapi2/, ''),
             target: 'http://localhost:5195/',
             ws: true,
           },
@@ -24,6 +23,11 @@ export default defineConfig(async () => {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
             target: 'http://localhost:5195/api',
+            ws: true,
+          },
+          '/cas': {
+            changeOrigin: true,
+            target: 'http://localhost:5195/',
             ws: true,
           },
         },

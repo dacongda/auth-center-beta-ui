@@ -108,6 +108,9 @@ const authFunc = async (params: Recordable<any>, jumpCaptcha = false) => {
   } else if (route.name === 'SAMLLogin') {
     params.type = 'saml';
     oAuthParms.client_id = route.params.clientId?.toString();
+  } else if (route.name === 'CasLogin') {
+    params.type = 'cas';
+    oAuthParms.client_id = route.params.clientId?.toString();
   } else {
     params.type = 'login';
   }
@@ -243,6 +246,8 @@ const getLoginType = () => {
     return 'oauth';
   } else if (route.name === 'SAMLLogin') {
     return 'saml';
+  } else if (route.name === 'CasLogin') {
+    return 'cas';
   } else {
     return 'login';
   }

@@ -81,6 +81,14 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'CasLogin',
+        path: 'login-cas/:clientId',
+        component: () => import('#/views/_core/authentication/login.vue'),
+        meta: {
+          title: $t('page.auth.login'),
+        },
+      },
+      {
         name: 'Callback',
         path: 'callback',
         component: () =>
@@ -130,6 +138,14 @@ const coreRoutes: RouteRecordRaw[] = [
         component: () => import('#/views/_core/authentication/register.vue'),
         meta: {
           title: $t('page.auth.register'),
+        },
+      },
+      {
+        name: 'Logout',
+        path: 'logout',
+        component: () => import('#/views/_core/authentication/logout.vue'),
+        meta: {
+          title: $t('page.auth.logout'),
         },
       },
     ],
