@@ -73,6 +73,15 @@ const coreRoutes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'AuthConfirm',
+        path: 'authConfirm',
+        component: () =>
+          import('#/views/_core/authentication/auth-confirm.vue'),
+        meta: {
+          title: $t('page.auth.auth_confirm'),
+        },
+      },
+      {
         name: 'SAMLLogin',
         path: 'login-saml/:clientId',
         component: () => import('#/views/_core/authentication/login.vue'),

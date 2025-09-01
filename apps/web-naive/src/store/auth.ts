@@ -28,12 +28,15 @@ export const useAuthStore = defineStore(
     const oAuthParmsCache = ref<any>();
     const paramsCache = ref<any>();
     const loginApplication = ref<any>();
+    const loginUserInfo = ref<any>();
     const mfaVerifyRequest = ref<AuthApi.LoginResult>();
 
     const callbackState = ref<any>();
 
+    const confirmCallback = ref<any>();
+
     async function handleOAuthLogin(res: any, oAuthParms: any) {
-      const params = new URLSearchParams();
+      let params = new URLSearchParams();
       if (res?.code) {
         params.set('code', res.code);
       }
@@ -50,6 +53,35 @@ export const useAuthStore = defineStore(
       if (oAuthParms.state) {
         params.set('state', oAuthParms.state);
       }
+
+      if (!loginApplication.value?.enableAuthorizeConfirm) {
+        confirmCallback.value = (success: any) => {
+          if (!success) {
+            params = new URLSearchParams();
+            if (oAuthParms.state) {
+              params.set('state', oAuthParms.state);
+            }
+            params.set('error', 'access_denied');
+          }
+
+          if (oAuthParms.response_mode === 'form_post') {
+            createPostFormAndSubmit(params, oAuthParms.redirect_uri);
+          } else if (oAuthParms.response_mode === 'fragment') {
+            window.location.href = `${oAuthParms.redirect_uri}#${params.toString()}`;
+          } else {
+            window.location.href = `${oAuthParms.redirect_uri}?${params.toString()}`;
+          }
+        };
+
+        window.console.log(oAuthParms);
+
+        router.push({
+          name: 'AuthConfirm',
+          query: { scopes: oAuthParms.scope },
+        });
+        return;
+      }
+
       if (oAuthParms.response_mode === 'form_post') {
         createPostFormAndSubmit(params, oAuthParms.redirect_uri);
       } else if (oAuthParms.response_mode === 'fragment') {
@@ -130,6 +162,8 @@ export const useAuthStore = defineStore(
 
           userStore.setUserInfo(userInfo);
           accessStore.setAccessCodes(accessCodes);
+
+          loginUserInfo.value = userInfo;
 
           if (accessStore.loginExpired) {
             accessStore.setLoginExpired(false);
@@ -234,7 +268,9 @@ export const useAuthStore = defineStore(
       paramsCache,
       oAuthParmsCache,
       loginApplication,
+      loginUserInfo,
       callbackState,
+      confirmCallback,
       logout,
     };
   },

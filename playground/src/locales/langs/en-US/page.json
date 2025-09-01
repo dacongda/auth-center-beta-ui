@@ -8,7 +8,8 @@
     "logout": "Logout",
     "qrcodeLogin": "Qr Code Login",
     "register": "Register",
-    "sendingCode": "SMS Code is sending..."
+    "sendingCode": "SMS Code is sending...",
+    "auth_confirm": "Auth confirm"
   },
   "dashboard": {
     "analytics": "Analytics",

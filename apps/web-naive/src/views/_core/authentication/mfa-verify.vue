@@ -1,7 +1,7 @@
 <script lang="tsx" setup>
 import { onMounted, ref } from 'vue';
 
-import { NButton, NDivider, NH1, NH3, NSpace } from 'naive-ui';
+import { NButton, NCheckbox, NDivider, NH1, NH3, NSpace } from 'naive-ui';
 
 import { sendVerificationCodeApi } from '#/api';
 import { getCaptcha } from '#/api/core/captcha';
@@ -15,6 +15,7 @@ const mfaVerifyRequest = authStore?.mfaVerifyRequest;
 const curType = ref(mfaVerifyRequest?.preferredMfa);
 
 const code = ref('');
+const trustMfa = ref(false);
 const verifyCodeId = ref('');
 
 const captchaProvider = ref();
@@ -33,6 +34,7 @@ const handleVerify = () => {
   params.code = code.value;
   params.password = verifyCodeId.value;
   params.loginMethod = curType.value;
+  params.trustMfa = trustMfa.value;
   authStore.authLogin(params, oAuthParmas);
 };
 
@@ -76,6 +78,8 @@ const handleResend = async (captchaId: any, captchaCode: any) => {
       :resend="handleResend"
       :application-id="authStore.loginApplication.id"
     />
+
+    <NCheckbox v-model:checked="trustMfa">信任7天</NCheckbox>
 
     <NButton type="primary" block @click="handleVerify">验证</NButton>
     <NDivider />

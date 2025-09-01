@@ -15,8 +15,10 @@
     "login": "登录",
     "logout": "注销",
     "qrcodeLogin": "二维码登录",
-    "register": "注册"
+    "register": "注册",
+    "auth_confirm": "登陆确认"
   },
+
   "dashboard": {
     "analytics": "分析页",
     "title": "概览",
