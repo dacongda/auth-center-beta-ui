@@ -65,6 +65,10 @@ interface AuthenticationProps {
    * @zh_CN 提交按钮文本
    */
   submitButtonText?: string;
+  /**
+   * @zh_CN 登陆注册按钮样式
+   */
+  buttonStyle?: string;
 }
 
 export type { AuthenticationProps };

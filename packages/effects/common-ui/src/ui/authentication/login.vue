@@ -39,6 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
   submitButtonText: '',
   subTitle: '',
   title: '',
+  buttonStyle: '',
 });
 
 const emit = defineEmits<{
@@ -136,6 +137,7 @@ defineExpose({
       :class="{
         'cursor-wait': loading,
       }"
+      :style="props.buttonStyle"
       :loading="loading"
       aria-label="login"
       class="w-full"

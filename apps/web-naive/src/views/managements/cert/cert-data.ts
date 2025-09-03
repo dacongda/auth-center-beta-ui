@@ -8,7 +8,6 @@ export const gridOptions: VxeGridProps = {
     labelField: 'name',
   },
   columns: [
-    { title: '序号', type: 'seq', width: 50 },
     // { align: 'left', title: 'Name', type: 'checkbox', width: 100 },
     { field: 'id', sortable: false, title: 'Id', width: 80 },
     { field: 'name', sortable: false, title: 'Name' },

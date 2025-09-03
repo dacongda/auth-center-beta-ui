@@ -21,8 +21,14 @@ type SupportedLanguagesType = 'en-US' | 'zh-CN';
 interface AppPreferences {
   /** 权限模式 */
   accessMode: AccessModeType;
+  /** 登陆注册背景样式 */
+  authBackgroundStyle: string;
   /** 登录注册页面布局 */
   authPageLayout: AuthPageLayoutType;
+  /** 登陆注册页面LOGO规则 */
+  authPageLogoRule: string;
+  /** 登陆注册页面样式 */
+  authPanelStyle: string;
   /** 检查更新轮询时间 */
   checkUpdatesInterval: number;
   /** 是否开启灰色模式 */

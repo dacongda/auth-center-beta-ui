@@ -8,6 +8,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { AuthenticationRegister, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { NResult } from 'naive-ui';
+
 import { message } from '#/adapter/naive';
 import { registerApi, sendVerificationCodeApi } from '#/api';
 import { getGroupWithApplicationApi } from '#/api/core/group';
@@ -97,6 +99,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'Input',
       componentProps: {
+        style: application.value?.loginFormSetting?.input?.style,
         placeholder: $t('authentication.usernameTip'),
         size: 'large',
       },
@@ -107,6 +110,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'Input',
       componentProps: {
+        style: application.value?.loginFormSetting?.input?.style,
         placeholder: $t('authentication.nicknameTip'),
         size: 'large',
       },
@@ -115,10 +119,13 @@ const formSchema = computed((): VbenFormSchema[] => {
       rules: z.string().min(1, { message: $t('authentication.nicknameTip') }),
     },
     {
-      component: 'VbenInputPassword',
+      component: 'Input',
       componentProps: {
-        passwordStrength: true,
+        style: application.value?.loginFormSetting?.input?.style,
         placeholder: $t('authentication.password'),
+        size: 'large',
+        type: 'password',
+        showPasswordOn: 'mousedown',
       },
       fieldName: 'password',
       label: $t('authentication.password'),
@@ -130,9 +137,13 @@ const formSchema = computed((): VbenFormSchema[] => {
       rules: z.string().min(1, { message: $t('authentication.passwordTip') }),
     },
     {
-      component: 'VbenInputPassword',
+      component: 'Input',
       componentProps: {
+        style: application.value?.loginFormSetting?.input?.style,
         placeholder: $t('authentication.confirmPassword'),
+        size: 'large',
+        type: 'password',
+        showPasswordOn: 'mousedown',
       },
       dependencies: {
         rules(values) {
@@ -165,6 +176,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'Sendcode',
       componentProps: {
+        style: application.value?.loginFormSetting?.input?.style,
         placeholder: $t('authentication.email') + $t('authentication.code'),
         type: 'Email',
         applicationId: application.value?.id,
@@ -197,6 +209,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'Sendcode',
       componentProps: {
+        style: application.value?.loginFormSetting?.input?.style,
         placeholder: $t('authentication.mobile') + $t('authentication.code'),
         type: 'SMS',
         applicationId: application.value?.id,
@@ -231,6 +244,7 @@ const formSchema = computed((): VbenFormSchema[] => {
         if: () => {
           return !!captchaProvider.value;
         },
+        show: false,
       },
       fieldName: 'code',
       label: $t('authentication.code'),
@@ -262,13 +276,31 @@ async function handleSubmit(value: Recordable<any>, jumpCaptcha = false) {
 </script>
 
 <template>
-  <AuthenticationRegister
-    ref="registerRef"
-    title="创建账号"
-    :login-path="`/auth/login/${groupName}`"
-    sub-title=" "
-    :form-schema="formSchema"
-    :loading="loading"
-    @submit="handleSubmit"
-  />
+  <div :style="application?.loginFormSetting?.loginPanel?.style ?? ''">
+    <AuthenticationRegister
+      v-if="!group?.disableSignup"
+      ref="registerRef"
+      title="创建账号"
+      :login-path="`/auth/login/${groupName}`"
+      sub-title=" "
+      :form-schema="formSchema"
+      :loading="loading"
+      @submit="handleSubmit"
+    />
+    <div v-else>
+      <NResult
+        status="error"
+        title="禁止注册"
+        description="此群组开启了禁止注册"
+      />
+      <div class="mt-4 text-center text-sm">
+        <span
+          class="vben-link text-sm font-normal"
+          @click="router.push(`/auth/login/${groupName}`)"
+        >
+          {{ $t('authentication.goToLogin') }}
+        </span>
+      </div>
+    </div>
+  </div>
 </template>

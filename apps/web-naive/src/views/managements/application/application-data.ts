@@ -9,6 +9,7 @@ export interface Application {
   faviconUrl?: string;
   logoUrl?: string;
   logoDarkUrl?: string;
+  enableAuthorizeConfirm?: boolean;
   clientId?: string;
   clientSecret?: string;
   groupIds?: Array<number>;
@@ -25,10 +26,28 @@ export interface Application {
   samlResponseCompress?: boolean;
   samlEncrypt?: boolean;
   providerItems: Array<any>;
+  loginMethods: Array<any>;
+  providers?: Array<any>;
+  loginFormSetting: LoginFormSetting;
   theme: {
     primaryColor: string;
     radius: string;
   };
+}
+
+export interface LoginFormSetting {
+  loginPanel: LoginFormSettingItem;
+  loginBackground: LoginFormSettingItem;
+  formLogo: LoginFormSettingItem;
+  input: LoginFormSettingItem;
+  loginButton: LoginFormSettingItem;
+  thirdPartLogin: LoginFormSettingItem;
+}
+
+export interface LoginFormSettingItem {
+  style?: string;
+  rule?: string;
+  visible?: boolean;
 }
 
 export interface ApplicationForm {
@@ -127,6 +146,13 @@ export const providerRule: any = {
       ],
       multiple: true,
     },
+    OIDC: {
+      options: [
+        { label: '登陆', value: 'Login' },
+        { label: '注册', value: 'Register' },
+      ],
+      multiple: true,
+    },
     SAML: {
       options: [
         { label: '登陆', value: 'Login' },
@@ -161,5 +187,22 @@ export const providerRule: any = {
       ],
       multiple: true,
     },
+  },
+};
+
+export const loginMethod: any = {
+  password: {
+    label: '密码',
+  },
+  code: {
+    label: '验证码',
+    rule: [
+      { label: '全部', value: '' },
+      { label: '仅短信', value: 'onlySms' },
+      { label: '仅邮件', value: 'onlyEmail' },
+    ],
+  },
+  passkey: {
+    label: 'Passkey',
   },
 };

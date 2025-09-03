@@ -9,7 +9,7 @@ import { AuthenticationLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 import { preferences } from '@vben/preferences';
 
-import { NButton, NFlex, NImage, NTabPane, NTabs } from 'naive-ui';
+import { NButton, NFlex, NTabPane, NTabs } from 'naive-ui';
 
 import { sendVerificationCodeApi } from '#/api';
 import { getGroupWithApplicationApi } from '#/api/core/group';
@@ -22,13 +22,18 @@ import { handleThirdPartRedirect, updateAppTheme } from '#/utils';
 import { coerceToArrayBuffer, coerceToBase64Url } from '#/views/utils/webAuthn';
 
 defineOptions({ name: 'Login' });
+const { previewApplication, previewGroupName, isPreview } = defineProps([
+  'previewApplication',
+  'previewGroupName',
+  'isPreview',
+]);
 
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 
 const oAuthParms: any = route.query;
-const groupName: any = ref('built-in');
+const groupName: any = ref(previewGroupName ?? 'built-in');
 const group: any = ref();
 const application: any = ref();
 
@@ -127,11 +132,19 @@ const authFunc = async (params: Recordable<any>, jumpCaptcha = false) => {
 
 onMounted(async () => {
   groupName.value = route.params.groupName ?? 'built-in';
+  let clientId: any = route.params?.clientId;
+  if (!clientId) {
+    clientId = route.query?.client_id;
+  }
 
   const res: any = await getGroupWithApplicationApi({
     groupName: groupName.value,
-    clientId: route.params?.clientId,
+    clientId,
   });
+
+  if (isPreview) {
+    res.defaultApplication = previewApplication;
+  }
 
   if (res?.defaultApplication) {
     group.value = res;
@@ -147,11 +160,17 @@ onMounted(async () => {
       (p: any) => p.type === 'Auth',
     );
 
+    if (application.value.loginMehods?.length > 0) {
+      loginMethod.value = application.value.loginMehods[0];
+    }
+
     captchaRef.value = loginRef.value
       ?.getFormApi()
       ?.getFieldComponentRef('code');
 
-    updateAppTheme(application.value);
+    if (!isPreview) {
+      updateAppTheme(application.value);
+    }
   }
 });
 
@@ -164,6 +183,7 @@ const preProcessLoginParam = (params: Recordable<any>) => {
 };
 
 const formSchema = computed((): VbenFormSchema[] => {
+  window.console.log(application.value?.loginFormSetting?.input?.style);
   const loginFormSchemas: VbenFormSchema[] = [
     {
       component: 'Input',
@@ -171,8 +191,9 @@ const formSchema = computed((): VbenFormSchema[] => {
         placeholder:
           loginMethod.value === 'Code'
             ? '请输入邮箱/手机号'
-            : $t('authentication.usernameTip'),
+            : $t('authentication.username'),
         size: 'large',
+        style: application.value?.loginFormSetting?.input?.style,
       },
       fieldName: 'name',
       label: $t('authentication.username'),
@@ -188,6 +209,7 @@ const formSchema = computed((): VbenFormSchema[] => {
         showPasswordOn: 'mousedown',
         type: 'password',
         size: 'large',
+        style: application.value?.loginFormSetting?.input?.style,
       },
       dependencies: {
         triggerFields: ['loginMethod'],
@@ -207,6 +229,7 @@ const formSchema = computed((): VbenFormSchema[] => {
         disableDestination: true,
         resend: handleOnResend,
         size: 'large',
+        style: application.value?.loginFormSetting?.input?.style,
       },
       dependencies: {
         triggerFields: ['loginMethod'],
@@ -232,6 +255,7 @@ const formSchema = computed((): VbenFormSchema[] => {
         if: () => {
           return !!captchaProvider.value;
         },
+        show: false,
       },
       fieldName: 'code',
       label: $t('authentication.code'),
@@ -295,8 +319,12 @@ const handleLoginToThirdPart = async (item: any) => {
 </script>
 
 <template>
-  <div>
-    <NImage
+  <div :style="application?.loginFormSetting?.loginPanel?.style ?? ''">
+    <img
+      v-if="
+        application?.loginFormSetting?.formLogo?.visible &&
+        application?.loginFormSetting?.formLogo?.rule !== 'side-only'
+      "
       class="mb-2 w-full"
       style="justify-content: center; height: 5rem"
       :src="preferences.logo.source"
@@ -306,6 +334,7 @@ const handleLoginToThirdPart = async (item: any) => {
       :register-path="`/auth/register/${groupName}`"
       :form-schema="formSchema"
       :loading="authStore.loginLoading"
+      :button-style="application?.loginFormSetting?.loginButton?.style"
       @submit="authFunc"
     >
       <template #title>
@@ -315,9 +344,21 @@ const handleLoginToThirdPart = async (item: any) => {
           justify-content="space-evenly"
           type="line"
         >
-          <NTabPane name="Password" tab="密码" />
-          <NTabPane name="Code" tab="验证码" />
-          <NTabPane name="Passkey" tab="Passkey" />
+          <NTabPane
+            v-if="application?.loginMethods?.some((l: any) => l.name === 'password')"
+            name="Password"
+            tab="密码"
+          />
+          <NTabPane
+            v-if="application?.loginMethods?.some((l: any) => l.name === 'code')"
+            name="Code"
+            tab="验证码"
+          />
+          <NTabPane
+            v-if="application?.loginMethods?.some((l: any) => l.name === 'passkey')"
+            name="Passkey"
+            tab="Passkey"
+          />
         </NTabs>
       </template>
     </AuthenticationLogin>
@@ -328,6 +369,7 @@ const handleLoginToThirdPart = async (item: any) => {
         :key="idx"
         @click="handleLoginToThirdPart(item)"
         size="large"
+        :style="application?.loginFormSetting?.thirdPartLogin?.style"
       >
         <img :src="item?.faviconUrl" style="height: 1.5rem" />
         <span class="ml-1">{{ item.displayName }}</span>

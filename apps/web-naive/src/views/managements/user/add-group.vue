@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { Page } from '@vben/common-ui';
+import { Page, z } from '@vben/common-ui';
 
 import { NButton, NCard, NGrid, NGridItem } from 'naive-ui';
 
@@ -39,7 +39,6 @@ onMounted(async () => {
   if (id) {
     await getApplicationsByGroupIdApi(id).then((res) => {
       applicationList.value = res;
-      window.console.log(curGroup.value);
     });
     getGroupApi({ id }).then((res) => {
       curGroup.value = res;
@@ -58,7 +57,6 @@ onMounted(async () => {
 });
 
 const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
-  // 所有表单项共用，可单独在表单内覆盖
   commonConfig: {
     componentProps: {
       class: 'w-full',
@@ -92,6 +90,10 @@ const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
         placeholder: '请选择',
         showSearch: true,
       },
+      dependencies: {
+        triggerFields: ['parentId'],
+        if: (values, _) => !values.parentId,
+      },
       fieldName: 'defaultApplicationId',
       label: '默认应用',
     },
@@ -100,6 +102,10 @@ const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
       fieldName: 'disableSignup',
       componentProps: {
         style: { width: 'auto' },
+      },
+      dependencies: {
+        triggerFields: ['parentId'],
+        if: (values, _) => !values.parentId,
       },
       label: '禁止注册',
     },
@@ -140,6 +146,12 @@ const [BaseForm, { setFieldValue, setValues }] = useVbenForm({
         options: groupTree,
         treeNodeFilterProp: 'label',
       },
+      rules: z
+        .nullable(z.number())
+        .refine((value) => value?.toString() !== id?.toString(), {
+          message: '不可选择当前群组',
+        })
+        .nullish(),
       fieldName: 'parentId',
       label: '上级群组',
     },

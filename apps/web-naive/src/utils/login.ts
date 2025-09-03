@@ -1,3 +1,5 @@
+import type { AuthPageLayoutType } from '@vben/types';
+
 import { preferences, updatePreferences } from '@vben/preferences';
 import { createPostFormAndSubmit } from '@vben/utils';
 
@@ -48,9 +50,18 @@ export function updateAppTheme(application: any) {
   if (preferences.theme.mode === 'dark') {
     logo = application.logoDarkUrl;
   }
+
+  const authLayoutPosition = application.loginFormSetting?.loginPanel?.rule;
+
   updatePreferences({
     app: {
       name: application.displayName,
+      authPageLayout:
+        `panel-${authLayoutPosition ?? 'right'}` as AuthPageLayoutType,
+      authPageLogoRule: application?.loginFormSetting?.formLogo?.rule,
+      authPanelStyle: application?.loginFormSetting?.loginPanel?.style,
+      authBackgroundStyle:
+        application?.loginFormSetting?.loginBackground?.style,
     },
     logo: {
       source: logo,

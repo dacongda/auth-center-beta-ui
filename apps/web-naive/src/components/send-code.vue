@@ -3,14 +3,7 @@ import type { CountdownProps } from 'naive-ui';
 
 import { ref } from 'vue';
 
-import {
-  NButton,
-  NCountdown,
-  NFlex,
-  NInput,
-  NInputOtp,
-  NSpace,
-} from 'naive-ui';
+import { NButton, NCountdown, NFlex, NInput, NInputOtp } from 'naive-ui';
 
 import Captcha from '#/components/captcha.vue';
 import PhoneInput from '#/components/phone-input.vue';
@@ -76,7 +69,7 @@ const handleOnResendInner = async () => {
 };
 </script>
 <template>
-  <NSpace vertical class="w-full">
+  <NFlex vertical class="w-full" style="gap: 0">
     <template v-if="!props.disableDestination">
       <PhoneInput
         :size="props.size"
@@ -156,5 +149,5 @@ const handleOnResendInner = async () => {
         />
       </NButton>
     </NFlex>
-  </NSpace>
+  </NFlex>
 </template>

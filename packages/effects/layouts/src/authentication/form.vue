@@ -5,9 +5,7 @@ defineOptions({
 </script>
 
 <template>
-  <div
-    class="flex-col-center dark:bg-background-deep bg-background relative px-6 py-10 lg:flex-initial lg:px-8"
-  >
+  <div class="flex-col-center relative px-6 py-10 lg:flex-initial lg:px-8">
     <slot></slot>
     <!-- Router View with Transition and KeepAlive -->
     <RouterView v-slot="{ Component, route }">
