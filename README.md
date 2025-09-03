@@ -6,8 +6,8 @@
   <h1>Auth center</h1>
 </div>
 
+**English**
 
-**English** 
 ## Introduction
 
 This project is the fronend ui for auth center, base on [Vben Admin](https://github.com/vbenjs/vue-vben-admin)
