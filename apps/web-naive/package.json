@@ -41,7 +41,7 @@
     "@vben/types": "workspace:*",
     "@vben/utils": "workspace:*",
     "@vueuse/core": "catalog:",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.3.0",
     "naive-ui": "catalog:",
     "pinia": "catalog:",
     "vue": "catalog:",
