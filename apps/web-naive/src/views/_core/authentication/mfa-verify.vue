@@ -12,7 +12,9 @@ const authStore = useAuthStore();
 
 const mfaVerifyRequest = authStore?.mfaVerifyRequest;
 
-const curType = ref(mfaVerifyRequest?.preferredMfa);
+const curType = ref(
+  mfaVerifyRequest?.preferredMfa || mfaVerifyRequest?.avaliableMfa?.[0],
+);
 
 const code = ref('');
 const trustMfa = ref(false);

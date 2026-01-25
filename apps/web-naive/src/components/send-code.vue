@@ -98,12 +98,12 @@ const handleOnResendInner = async () => {
       />
     </div>
 
-    <NInput
+    <!-- <NInput
       v-if="props.type === 'RecoveryCode'"
       :size="props.size"
       v-model:value="code"
       placeholder="请输入救援代码"
-    />
+    /> -->
 
     <NFlex
       align="center"
