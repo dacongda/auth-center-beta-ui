@@ -13,10 +13,14 @@ export async function handleThirdPartRedirect(
 ) {
   const authStore = useAuthStore();
   authStore.callbackState = state;
-  if (provider.subType === 'OAuth2' || provider.subType === 'OIDC') {
+  if (
+    provider.subType === 'OAuth2' ||
+    provider.subType === 'OIDC' ||
+    provider.subType === 'WeChat'
+  ) {
     const { redirectUrl, tempId } = await getOAuthReqestApi({
       id: provider.id,
-      type: 'login',
+      type: state.type,
     });
 
     authStore.callbackState.tempId = tempId;

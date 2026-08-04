@@ -153,6 +153,13 @@ export const providerRule: any = {
       ],
       multiple: true,
     },
+    WeChat: {
+      options: [
+        { label: '登陆', value: 'Login' },
+        { label: '注册', value: 'Register' },
+      ],
+      multiple: true,
+    },
     SAML: {
       options: [
         { label: '登陆', value: 'Login' },

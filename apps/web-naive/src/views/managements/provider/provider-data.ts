@@ -73,7 +73,7 @@ export const providerTypes: any = {
     'TencentTsec',
   ],
   Email: ['SMTP'],
-  Auth: ['OAuth2', 'OIDC', 'SAML'],
+  Auth: ['OAuth2', 'OIDC', 'SAML', 'WeChat'],
   Storage: ['Local', 'S3'],
   SMS: ['Tencent', 'Twilio'],
 };
@@ -143,6 +143,15 @@ export const providerFieldArray: any = {
       { name: 'userInfoEndpoint', label: '用户信息端点' },
       { name: 'scopes', label: 'Scopes' },
       { name: 'userInfoMap', label: '用户映射' },
+    ],
+    WeChat: [
+      { name: 'clientId', label: 'AppID' },
+      { name: 'clientSecret', label: 'AppSecret' },
+      { name: 'authEndpoint', label: '登录端点（可选）' },
+      { name: 'tokenEndpoint', label: 'Token端点（可选）' },
+      { name: 'userInfoEndpoint', label: '用户信息端点（可选）' },
+      { name: 'scopes', label: 'Scopes（默认 snsapi_login）' },
+      { name: 'userInfoMap', label: '用户映射（可选）' },
     ],
     SAML: [
       { name: 'configureUrl', label: 'IDP元数据链接' },
